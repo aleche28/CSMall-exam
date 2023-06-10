@@ -1,0 +1,28 @@
+## Register user
+POST http://localhost:3000/api/register HTTP/1.1
+content-type: application/json
+
+{
+    "username": "user",
+    "email": "user@email.com",
+    "password": "password"
+}
+###
+
+## Login user
+POST http://localhost:3000/api/login HTTP/1.1
+content-type: application/json
+
+{
+    "username": "user",
+    "password": "password"
+}
+###
+
+## Logout
+POST http://localhost:3000/api/logout HTTP/1.1
+###
+
+## Check if logged in or not
+POST http://localhost:3000/api/checklogin HTTP/1.1
+###
