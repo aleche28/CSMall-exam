@@ -115,7 +115,6 @@ exports.getPageById = (pageId) => {
       if (!rows.length) {
         resolve({ error: "Page not found" });
       } else {
-        console.log(rows);
         const page = aggregateRows(rows);
         resolve(page);
       }

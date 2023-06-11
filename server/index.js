@@ -8,6 +8,7 @@ const passport = require("passport");
 const passportConfig = require("./config/passport.config");
 const authRouter = require('./routes/auth.router');
 const pagesRouter = require('./routes/pages.router');
+const blocksRouter = require('./routes/blocks.router');
 
 const app = express();
 app.use(morgan("dev"));
@@ -36,6 +37,7 @@ app.use(passport.authenticate('session'));
 /* routes */
 app.use('/api', authRouter);
 app.use('/api', pagesRouter);
+app.use('/api', blocksRouter);
 
 
 const PORT = 3000;

@@ -2,10 +2,17 @@
 
 const db = require("../db/db");
 
+const toBlockObject = (row) => {
+  return {
+    id: row.id,
+    type: row.type,
+    content: row.content,
+    position: row.position,
+    page: row.page,
+  };
+};
+
 exports.createBlock = (newBlock) => {
-  // This function assumes dates are already in the correct format "YYYY-MM-DD".
-  // The controller at the upper layer should apply business rules,
-  // such as setting creationDate to today's date.
   return new Promise((resolve, reject) => {
     const sql =
       "INSERT INTO blocks (type, content, position, page) VALUES(?, ?, ?, ?)";
@@ -15,8 +22,65 @@ exports.createBlock = (newBlock) => {
       function (err) {
         if (err) reject(err);
 
-        resolve("Added block to page " + newBlock.page);
+        resolve(exports.getBlockById(this.lastID));
       }
     );
+  });
+};
+
+exports.getBlockById = (blockId) => {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT * FROM blocks WHERE id = ?";
+    db.get(sql, [blockId], (err, row) => {
+      if (err) reject(err);
+
+      if (!row) {
+        resolve({ error: "Block not found" });
+      }
+
+      resolve(toBlockObject(row));
+    });
+  });
+};
+
+exports.getBlocksByPageId = (pageId) => {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT * FROM blocks WHERE id = ?";
+    db.get(sql, [pageId], (err, rows) => {
+      if (err) reject(err);
+
+      const blocks = rows.map((r) => toBlockObject(r));
+      resolve(blocks);
+    });
+  });
+};
+
+exports.updateBlockById = (blockId, block) => {
+  return new Promise((resolve, reject) => {
+    const sql = "UPDATE blocks SET type=?, content=?, position=? WHERE id = ?";
+    db.run(
+      sql,
+      [block.type, block.content, block.position, blockId],
+      function (err) {
+        if (err) {
+          reject(err);
+        }
+        if (this.changes !== 1) resolve({ error: "Block not found" });
+        else resolve(exports.getBlockById(blockId));
+      }
+    );
+  });
+};
+
+exports.deleteBlockById = (blockId) => {
+  return new Promise((resolve, reject) => {
+    const sql = "DELETE FROM blocks WHERE id = ?";
+    db.run(sql, [id], function (err) {
+      if (err) {
+        reject(err);
+      }
+      if (this.changes !== 1) resolve({ error: "Block not found" });
+      else resolve({ message: "Block deleted" });
+    });
   });
 };

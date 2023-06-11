@@ -17,12 +17,10 @@ const isAuthor = (req, res, next) => {
   if (req.params.authorId === req.user.username) {
     return next();
   }
-  return res
-    .status(401)
-    .json({
-      error:
-        "Not authorized: user making the request is not the author passed to params",
-    });
+  return res.status(401).json({
+    error:
+      "Not authorized: user making the request is not the author passed to params",
+  });
 };
 
 /*************************
@@ -42,7 +40,6 @@ router.get("/pages/published", pagesController.getAllPublishedPages);
  * Get a specific published page
  */
 router.get("/pages/published/:pageId", pagesController.getPublishedPageById);
-
 
 /************************
  *  Back-office routes  *
@@ -70,7 +67,7 @@ router.get("/pages/:pageId", pagesController.getPage);
  * GET /api/author/:authorId/pages
  *
  * Get all created pages from an author.
- * Requires: 
+ * Requires:
  *  1 - authentication
  *  2 - the user making the request should be the author
  *      represented by the authorId
@@ -83,25 +80,10 @@ router.get(
 
 /**
  * POST /api/pages
- * 
+ *
  * Create a new page.
  * Fields of the page are passed inside request body object
  */
-router.post(
-  "/pages",
-  pagesController.createPage
-);
-
-/**
- * POST /api/pages/:pageId/blocks/
- * 
- * Add a new block to a page.
- * Fields of the block are passed inside request body object
- */
-router.post(
-  "/pages/:pageId/blocks/",
-  pagesController.createBlock
-);
-
+router.post("/pages", pagesController.createPage);
 
 module.exports = router;

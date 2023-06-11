@@ -8,11 +8,10 @@ const dateFormat = "YYYY-MM-DD";
 const isPublished = (page) => {
   const today = dayjs().format(dateFormat);
   return (
-    !!page.publicationDate && dayjs(page.publicationDate).format(dateFormat) <= today
+    !!page.publicationDate &&
+    dayjs(page.publicationDate).format(dateFormat) <= today
   );
 };
-
-
 
 exports.getAllPages = async (req, res) => {
   try {
@@ -71,29 +70,12 @@ exports.createPage = async (req, res) => {
       title: req.body.title,
       author: req.user.username,
       creationDate: dayjs().format(dateFormat),
-      publicationDate: (req.publicationDate && dayjs(req.publicationDate)) || null,
-    }
+      publicationDate:
+        (req.publicationDate && dayjs(req.publicationDate)) || null,
+    };
     const newPage = await pagesDAO.createPage(body);
     res.json(newPage);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-}
-
-exports.createBlock = async (req, res) => {
-  try {
-    const body = {
-      type: req.body.type,
-      content: req.body.content,
-      position: Number(req.body.position),
-      page: req.params.pageId
-    }
-    const newBlock = await pagesDAO.createBlock(body);
-    res.json(newBlock);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-}
-
-
-
+};
