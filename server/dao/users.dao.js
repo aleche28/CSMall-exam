@@ -52,7 +52,7 @@ exports.getUserById = (id) => {
 
 exports.createUser = (username, email, password) => {
   return new Promise((resolve, reject) => {
-    const role = "Admin"; // at the moment the role is hardcoded just to create some admin/users
+    const role = "User"; // at the moment the role is hardcoded just to create some admin/users
     const salt = crypto.randomBytes(16).toString("hex");
     crypto.scrypt(password, salt, 32, function (err, hashedPassword) {
       if (err) reject(err);

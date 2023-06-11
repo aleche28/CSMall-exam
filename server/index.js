@@ -7,6 +7,7 @@ const session = require("express-session");
 const passport = require("passport");
 const passportConfig = require("./config/passport.config");
 const authRouter = require('./routes/auth.router');
+const pagesRouter = require('./routes/pages.router');
 
 const app = express();
 app.use(morgan("dev"));
@@ -34,12 +35,7 @@ app.use(passport.authenticate('session'));
 
 /* routes */
 app.use('/api', authRouter);
-
-
-app.get("/guess", (req, res) => {
-  const n = Math.floor(Math.random() * 100);
-  res.send(String(n));
-});
+app.use('/api', pagesRouter);
 
 
 const PORT = 3000;
