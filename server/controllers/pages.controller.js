@@ -103,15 +103,11 @@ exports.updatePage = async (req, res) => {
 
 exports.deletePage = async (req, res) => {
   try {
-    const body = {
-      title: req.body.title,
-      author: req.user.username,
-      creationDate: dayjs().format(dateFormat),
-      publicationDate:
-        (req.publicationDate && dayjs(req.publicationDate).format(dateFormat)) || null,
-    };
-    const newPage = await pagesDAO.createPage(body);
-    res.json(newPage);
+    const result = await pagesDAO.deletePageById(req.params.pageId);
+    
+    if (result.error)
+      return res.status(404).json({ error: result.error });
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

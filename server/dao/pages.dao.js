@@ -1,7 +1,8 @@
 "use strict";
 
-const db = require("../db/db");
 const dayjs = require("dayjs");
+const db = require("../db/db");
+const blocksDAO = require("../dao/blocks.dao");
 
 const dateFormat = "YYYY-MM-DD";
 
@@ -169,5 +170,21 @@ exports.updatePage = (pageId, page) => {
         resolve(exports.getPageById(pageId));
       }
     );
+  });
+};
+
+exports.deletePageById = (pageId) => {
+  return new Promise(async (resolve, reject) => {
+    // delete all blocks in the page before deleting the page
+    const { countDeleted } = await blocksDAO.deleteAllPageBlocks(pageId);
+
+    const sql = "DELETE FROM pages WHERE id = ?";
+    db.run(sql, [pageId], function (err) {
+      if (err) {
+        reject(err);
+      }
+      if (this.changes !== 1) resolve({ error: "Block not found" });
+      else resolve({ message: "Block deleted", blocksDeleted: countDeleted });
+    });
   });
 };

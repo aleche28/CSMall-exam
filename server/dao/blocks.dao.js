@@ -75,12 +75,24 @@ exports.updateBlockById = (blockId, block) => {
 exports.deleteBlockById = (blockId) => {
   return new Promise((resolve, reject) => {
     const sql = "DELETE FROM blocks WHERE id = ?";
-    db.run(sql, [id], function (err) {
+    db.run(sql, [blockId], function (err) {
       if (err) {
         reject(err);
       }
       if (this.changes !== 1) resolve({ error: "Block not found" });
       else resolve({ message: "Block deleted" });
+    });
+  });
+};
+
+exports.deleteAllPageBlocks = (pageId) => {
+  return new Promise((resolve, reject) => {
+    const sql = "DELETE FROM blocks WHERE page = ?";
+    db.run(sql, [pageId], function (err) {
+      if (err) {
+        reject(err);
+      }
+      resolve({ countDeleted: this.changes });
     });
   });
 };
