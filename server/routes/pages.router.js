@@ -23,6 +23,11 @@ const isAuthor = (req, res, next) => {
   });
 };
 
+const isAdmin = (req, res, next) => {
+  if (req.user.role === "Admin") return next();
+  return res.status(401).json({ error: "Not authorized: must be an admin" });
+};
+
 /*************************
  *  Front-office routes  *
  *************************/
@@ -64,7 +69,7 @@ router.get("/pages", pagesController.getAllPages);
 router.get("/pages/:pageId", pagesController.getPage);
 
 /**
- * GET /api/author/:authorId/pages
+ * GET /api/authors/:authorId/pages
  *
  * Get all created pages from an author.
  * Requires:
@@ -73,7 +78,7 @@ router.get("/pages/:pageId", pagesController.getPage);
  *      represented by the authorId
  */
 router.get(
-  "/author/:authorId/pages",
+  "/authors/:authorId/pages",
   isAuthor,
   pagesController.getAllPagesByAuthor
 );
@@ -85,5 +90,58 @@ router.get(
  * Fields of the page are passed inside request body object
  */
 router.post("/pages", pagesController.createPage);
+
+/**
+ * PUT /api/authors/:authorId/pages/:pageId
+ *
+ * Edit an existing page.
+ * Fields of the page are passed inside request body object
+ * Requires:
+ *  - user making the request must be the author of the page
+ */
+router.put(
+  "/authors/:authorId/pages/:pageId",
+  isAuthor,
+  pagesController.updatePage
+);
+
+/**
+ * DELETE /api/authors/:authorId/pages/:pageId
+ *
+ * Delete a page (and its blocks).
+ * Requires:
+ *  - user making the request must be the author of the page
+ */
+router.delete(
+  "/authors/:authorId/pages/:pageId",
+  isAuthor,
+  (req, res, next) => {
+    if (req.author !== authorId)
+      return res
+        .status(401)
+        .json({
+          error: "Not authorized: only admin can change authorship of the page",
+        });
+    next();
+  },
+  pagesController.deletePage
+);
+
+/* Admin-only routes */
+
+/**
+ * PUT /api/pages/:pageId
+ *
+ * Edit an existing page.
+ * Fields of the page are passed inside request body object
+ */
+router.put("/pages/:pageId", isAdmin, pagesController.updatePage);
+
+/**
+ * DELETE /api/pages/:pageId
+ *
+ * Delete a page (and its blocks).
+ */
+router.delete("/pages/:pageId", isAdmin, pagesController.deletePage);
 
 module.exports = router;

@@ -40,8 +40,10 @@ const aggregateRows = (rows) => {
       if (page) pages.push(page);
       page = toPageObject(row);
     }
-    block = toBlockObject(row);
-    page.blocks.push(block);
+    if (row.blockId) {
+      block = toBlockObject(row);
+      page.blocks.push(block);
+    }
   }
   pages.push(page);
   return pages;
@@ -52,8 +54,8 @@ exports.getAllPages = () => {
     const sql =
       "SELECT p.id, title, author, creation_date, publication_date,\
       b.id as blockId, type, position, content\
-      FROM pages p, blocks b\
-      WHERE b.page = p.id\
+      FROM pages p LEFT JOIN blocks b\
+      ON b.page = p.id\
       ORDER BY p.id, position";
     db.all(sql, (err, rows) => {
       if (err) reject(err);
@@ -70,8 +72,9 @@ exports.getAllPublishedPages = () => {
     const sql =
       "SELECT p.id, title, author, creation_date, publication_date,\
       b.id as blockId, type, position, content\
-      FROM pages p, blocks b\
-      WHERE b.page = p.id AND publication_date <= ?\
+      FROM pages p LEFT JOIN blocks b\
+      ON b.page = p.id\
+      WHERE publication_date <= ?\
       ORDER BY p.id, position";
     db.all(sql, [today], (err, rows) => {
       if (err) reject(err);
@@ -89,8 +92,9 @@ exports.getAllPagesByAuthor = (authorId) => {
     const sql =
       "SELECT p.id, title, author, creation_date, publication_date,\
       b.id as blockId, type, position, content\
-      FROM pages p, blocks b\
-      WHERE b.page = p.id AND author = ?\
+      FROM pages p LEFT JOIN blocks b\
+      ON b.page = p.id\
+      WHERE author = ?\
       ORDER BY p.id, position";
     db.all(sql, [authorId], (err, rows) => {
       if (err) reject(err);
@@ -106,8 +110,9 @@ exports.getPageById = (pageId) => {
     const sql =
       "SELECT p.id, title, author, creation_date, publication_date,\
       b.id as blockId, type, position, content\
-      FROM pages p, blocks b\
-      WHERE b.page = p.id AND p.id = ?\
+      FROM pages p LEFT JOIN blocks b\
+      ON b.page = p.id\
+      WHERE p.id = ?\
       ORDER BY p.id, position";
     db.all(sql, [pageId], (err, rows) => {
       if (err) reject(err);
@@ -115,7 +120,7 @@ exports.getPageById = (pageId) => {
       if (!rows.length) {
         resolve({ error: "Page not found" });
       } else {
-        const page = aggregateRows(rows);
+        const page = aggregateRows(rows)[0];
         resolve(page);
       }
     });
@@ -141,6 +146,27 @@ exports.createPage = (newPage) => {
         if (err) reject(err);
 
         resolve(exports.getPageById(this.lastID));
+      }
+    );
+  });
+};
+
+exports.updatePage = (pageId, page) => {
+  // This function assumes dates are already in the correct format "YYYY-MM-DD".
+  return new Promise((resolve, reject) => {
+    const sql =
+      "UPDATE pages SET title=?, author=?, publication_date=? WHERE id=?";
+    db.run(
+      sql,
+      [page.title, page.author, page.publicationDate, pageId],
+      function (err) {
+        if (err) {
+          if (err.code === "SQLITE_CONSTRAINT")
+            resolve({ error: "Author (user) not found" });
+          else reject(err);
+        }
+
+        resolve(exports.getPageById(pageId));
       }
     );
   });

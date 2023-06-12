@@ -7,6 +7,7 @@ const dateFormat = "YYYY-MM-DD";
 
 const isPublished = (page) => {
   const today = dayjs().format(dateFormat);
+
   return (
     !!page.publicationDate &&
     dayjs(page.publicationDate).format(dateFormat) <= today
@@ -53,6 +54,7 @@ exports.getAllPublishedPages = async (req, res) => {
 exports.getPublishedPageById = async (req, res) => {
   try {
     const page = await pagesDAO.getPageById(req.params.pageId);
+
     if (!page) {
       return res.status(404).json({ error: "Page not found" });
     }
@@ -71,7 +73,42 @@ exports.createPage = async (req, res) => {
       author: req.user.username,
       creationDate: dayjs().format(dateFormat),
       publicationDate:
-        (req.publicationDate && dayjs(req.publicationDate)) || null,
+        (req.publicationDate && dayjs(req.publicationDate).format(dateFormat)) || null,
+    };
+    const newPage = await pagesDAO.createPage(body);
+    res.json(newPage);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.updatePage = async (req, res) => {
+  try {
+    const body = {
+      title: req.body.title,
+      author: req.body.author,
+      publicationDate:
+        (req.body.publicationDate && dayjs(req.body.publicationDate).format(dateFormat)) || null,
+    };
+
+    const page = await pagesDAO.updatePage(req.params.pageId, body);
+    if (page.error)
+      return res.status(400).json({ error: page.error });
+
+    res.json(page);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.deletePage = async (req, res) => {
+  try {
+    const body = {
+      title: req.body.title,
+      author: req.user.username,
+      creationDate: dayjs().format(dateFormat),
+      publicationDate:
+        (req.publicationDate && dayjs(req.publicationDate).format(dateFormat)) || null,
     };
     const newPage = await pagesDAO.createPage(body);
     res.json(newPage);

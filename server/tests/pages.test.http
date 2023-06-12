@@ -3,9 +3,7 @@ POST http://localhost:3000/api/pages HTTP/1.1
 content-type: application/json
 
 {
-    "title": "test page published",
-    "author": "user",
-    "publicationDate": "2023-04-04"
+    "title": "test page to delete"
 }
 ###
 
@@ -18,11 +16,11 @@ GET http://localhost:3000/api/pages/published HTTP/1.1
 ###
 
 ## Get all pages by the user logged in
-GET http://localhost:3000/api/author/user/pages HTTP/1.1
+GET http://localhost:3000/api/authors/admin/pages HTTP/1.1
 ###
 
 ## Get a specific page
-GET http://localhost:3000/api/pages/4 HTTP/1.1
+GET http://localhost:3000/api/pages/12 HTTP/1.1
 ###
 
 ## Get a specific page (expect 404)
@@ -34,5 +32,20 @@ GET http://localhost:3000/api/pages/published/3 HTTP/1.1
 ###
 
 ## Get a published page (expect error)
-GET http://localhost:3000/api/pages/published/1 HTTP/1.1
+GET http://localhost:3000/api/pages/published/5 HTTP/1.1
+###
+
+## Update an existing page (admin only)
+PUT http://localhost:3000/api/pages/1 HTTP/1.1
+content-type: application/json
+
+{
+    "title": "test page updated",
+    "author": "admin",
+    "publicationDate": "2023-06-04"
+}
+###
+
+## Delete an existing page (admin only)
+DELETE http://localhost:3000/api/pages/5 HTTP/1.1
 ###
