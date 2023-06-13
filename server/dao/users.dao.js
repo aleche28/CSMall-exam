@@ -9,25 +9,27 @@ exports.getUser = (username, password) => {
     db.get(sql, [username], (err, row) => {
       if (err) reject(err);
 
-      if (!row) resolve({ error: "User not found" }); // the user does not exist
-
-      crypto.scrypt(password, row.salt, 32, function (err, hashedPassword) {
-        if (err) reject(err);
-        const isCorrect = crypto.timingSafeEqual(
-          Buffer.from(row.hash, "hex"),
-          hashedPassword
-        );
-        if (isCorrect) {
-          // the user exists and the provided password is correct
-          const user = { ...row };
-          delete user.salt;
-          delete user.hash;
-          resolve(user);
-        } else {
-          // the user exists but the provided password is wrong
-          resolve({ error: "Incorrect password" });
-        }
-      });
+      if (!row) {
+        resolve({ error: "User not found" }); // the user does not exist
+      } else {
+        crypto.scrypt(password, row.salt, 32, function (err, hashedPassword) {
+          if (err) reject(err);
+          const isCorrect = crypto.timingSafeEqual(
+            Buffer.from(row.hash, "hex"),
+            hashedPassword
+          );
+          if (isCorrect) {
+            // the user exists and the provided password is correct
+            const user = { ...row };
+            delete user.salt;
+            delete user.hash;
+            resolve(user);
+          } else {
+            // the user exists but the provided password is wrong
+            resolve({ error: "Incorrect password" });
+          }
+        });
+      }
     });
   });
 };
@@ -42,8 +44,7 @@ exports.getUserById = (id) => {
         resolve({ error: "User not found" });
       } else {
         // By default, the local strategy looks for "username":
-        // for simplicity, instead of using "email", we create an object with that property.
-        const user = { id: row.id, username: row.email, name: row.name };
+        const user = { id: row.id, username: row.username, email: row.email, role: row.role };
         resolve(user);
       }
     });

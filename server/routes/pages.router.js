@@ -102,6 +102,15 @@ router.post("/pages", pagesController.createPage);
 router.put(
   "/authors/:authorId/pages/:pageId",
   isAuthor,
+  (req, res, next) => {
+    if (req.body.author && req.body.author !== req.params.authorId)
+      return res.status(401).json({
+        error: "Not authorized: only admin can change authorship of the page",
+      });
+    req.body.author = req.params.authorId;
+    next();
+  },
+  // TO-DO: check if the page is actually from the author represented by authorId or not
   pagesController.updatePage
 );
 
@@ -115,15 +124,6 @@ router.put(
 router.delete(
   "/authors/:authorId/pages/:pageId",
   isAuthor,
-  (req, res, next) => {
-    if (req.author !== authorId)
-      return res
-        .status(401)
-        .json({
-          error: "Not authorized: only admin can change authorship of the page",
-        });
-    next();
-  },
   pagesController.deletePage
 );
 

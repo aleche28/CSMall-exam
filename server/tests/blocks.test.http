@@ -1,5 +1,5 @@
 ## Create a new block
-POST http://localhost:3000/api/pages/4/blocks HTTP/1.1
+POST http://localhost:3000/api/pages/13/blocks HTTP/1.1
 content-type: application/json
 
 {

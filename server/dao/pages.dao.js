@@ -183,8 +183,8 @@ exports.deletePageById = (pageId) => {
       if (err) {
         reject(err);
       }
-      if (this.changes !== 1) resolve({ error: "Block not found" });
-      else resolve({ message: "Block deleted", blocksDeleted: countDeleted });
+      if (this.changes !== 1) resolve({ error: "Page not found" });
+      else resolve({ message: "Page deleted", blocksDeleted: countDeleted });
     });
   });
 };

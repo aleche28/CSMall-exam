@@ -8,7 +8,23 @@ const authController = require("../controllers/auth.controller");
 router.post(
   "/login",
   // TO-DO: validate email and password
-  passport.authenticate("local"),
+  function (req, res, next) {
+    passport.authenticate("local", function (err, user, info, status) {
+      if (err) {
+        return next(err);
+      }
+      if (!user) {
+        // display wrong login messages
+        return res.status(401).json({ error: info });
+      }
+      req.login(user, (err) => {
+        if (err)
+          return next(err);
+        next();
+      });
+      
+    })(req, res, next);
+  },
   authController.login
 );
 

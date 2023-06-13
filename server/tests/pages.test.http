@@ -47,5 +47,20 @@ content-type: application/json
 ###
 
 ## Delete an existing page (admin only)
-DELETE http://localhost:3000/api/pages/5 HTTP/1.1
+DELETE http://localhost:3000/api/pages/13 HTTP/1.1
+###
+
+## Update an existing page (author only)
+PUT http://localhost:3000/api/authors/user/pages/1 HTTP/1.1
+content-type: application/json
+
+{
+    "title": "test page updated",
+    "author": "admin",
+    "publicationDate": "2023-06-04"
+}
+###
+
+## Delete an existing page (author only)
+DELETE http://localhost:3000/api/pages/13 HTTP/1.1
 ###
