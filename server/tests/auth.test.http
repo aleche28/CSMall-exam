@@ -26,3 +26,7 @@ POST http://localhost:3000/api/logout HTTP/1.1
 ## Check if logged in or not
 POST http://localhost:3000/api/checklogin HTTP/1.1
 ###
+
+## Check if logged in and return user object
+GET http://localhost:3000/api/sessions/current HTTP/1.1
+###

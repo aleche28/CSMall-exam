@@ -47,6 +47,22 @@ async function register(username, email, password) {
   }
 }
 
+async function getLoggedUser() {
+  try {
+    const response = await fetch(APIURL + "/sessions/current", {
+      credentials: "include",
+    });
+    if (response.ok) {
+      return await response.json();
+    } else {
+      const message = await response.text();
+      throw new Error(response.statusText + " " + message);
+    }
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
 async function logout() {
   try {
     const response = await fetch(APIURL + "/logout", {
@@ -81,4 +97,20 @@ async function getPublished() {
   }
 }
 
-export { login, register, logout, getPublished };
+async function getAll() {
+  try {
+    const response = await fetch(APIURL + "/pages", { credentials: "include" });
+
+    if (response.ok) {
+      const pages = await response.json();
+      return pages;
+    } else {
+      const res = await response.json();
+      throw new Error(res.error);
+    }
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+export { login, register, logout, getPublished, getAll };

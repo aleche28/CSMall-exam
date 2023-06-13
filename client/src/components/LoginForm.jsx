@@ -15,7 +15,8 @@ function LoginForm(props) {
     try {
       setErrMsg('') ;
       await props.checkLogin(username, password);
-      navigate("/");
+      // when the user logs in, redirect them to the back-office
+      navigate("/back-office");
     } catch (err) {
       setErrMsg(err.message) ;
     }

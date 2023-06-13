@@ -19,3 +19,30 @@
 .below-button {
     text-align: center;
 }
+
+.page-row {
+    background-color:whitesmoke;
+    box-shadow: 5px 5px 5px rgba(34, 35, 58, 0.2);
+}
+
+.page-row:hover {
+    cursor: pointer;
+    background-color: rgb(222, 239, 253);
+}
+
+.page-row:hover h4 {
+    color: #0d6efd;
+}
+
+.page-row small {
+    color: rgb(68, 68, 68);
+}
+
+.fixed-right-bottom {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    z-index: 1030;
+    margin: 0 3rem 3rem 0;
+    border-radius: 50%;
+}
