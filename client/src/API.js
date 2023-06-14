@@ -113,4 +113,52 @@ async function getAll() {
   }
 }
 
-export { login, register, logout, getPublished, getAll };
+async function getPublishedPage(pageId) {
+  try {
+    const response = await fetch(APIURL + `/pages/published/${pageId}`, { credentials: "include" });
+
+    if (response.ok) {
+      const page = await response.json();
+      return page;
+    } else {
+      const res = await response.json();
+      throw new Error(res.error);
+    }
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+async function getPage(pageId) {
+  try {
+    const response = await fetch(APIURL + `/pages/${pageId}`, { credentials: "include" });
+
+    if (response.ok) {
+      const page = await response.json();
+      return page;
+    } else {
+      const res = await response.json();
+      throw new Error(res.error);
+    }
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+async function getUsers(pageId) {
+  try {
+    const response = await fetch(APIURL + `/users`, { credentials: "include" });
+
+    if (response.ok) {
+      const users = await response.json();
+      return users;
+    } else {
+      const res = await response.json();
+      throw new Error(res.error);
+    }
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+export { login, register, logout, getPublished, getAll, getPublishedPage, getPage, getUsers, APIURL };

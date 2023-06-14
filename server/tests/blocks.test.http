@@ -1,11 +1,11 @@
 ## Create a new block
-POST http://localhost:3000/api/pages/13/blocks HTTP/1.1
+POST http://localhost:3000/api/pages/1/blocks HTTP/1.1
 content-type: application/json
 
 {
-    "type": "header",
-    "content": "this is the header",
-    "position": 1
+    "type": "image",
+    "content": "turin.jpg",
+    "position": 4
 }
 ###
 
@@ -19,12 +19,12 @@ GET http://localhost:3000/api/pages/3/blocks/1 HTTP/1.1
 
 
 ## Update a block
-PUT  http://localhost:3000/api/pages/4/blocks/7 HTTP/1.1
+PUT  http://localhost:3000/api/pages/1/blocks/14 HTTP/1.1
 content-type: application/json
 
 {
-    "type": "header",
-    "content": "this is the header",
-    "position": 2
+    "type": "image",
+    "content": "dog.jpg",
+    "position": 5
 }
 ###

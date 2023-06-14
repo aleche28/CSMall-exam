@@ -30,3 +30,7 @@ POST http://localhost:3000/api/checklogin HTTP/1.1
 ## Check if logged in and return user object
 GET http://localhost:3000/api/sessions/current HTTP/1.1
 ###
+
+## Get the list of all users
+GET http://localhost:3000/api/users HTTP/1.1
+###

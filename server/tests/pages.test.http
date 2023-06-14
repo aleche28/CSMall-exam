@@ -20,7 +20,7 @@ GET http://localhost:3000/api/authors/admin/pages HTTP/1.1
 ###
 
 ## Get a specific page
-GET http://localhost:3000/api/pages/12 HTTP/1.1
+GET http://localhost:3000/api/pages/1 HTTP/1.1
 ###
 
 ## Get a specific page (expect 404)
@@ -51,13 +51,13 @@ DELETE http://localhost:3000/api/pages/13 HTTP/1.1
 ###
 
 ## Update an existing page (author only)
-PUT http://localhost:3000/api/authors/user/pages/1 HTTP/1.1
+PUT http://localhost:3000/api/authors/admin/pages/1 HTTP/1.1
 content-type: application/json
 
 {
-    "title": "test page updated",
+    "title": "Lorem ipsum dolor sit",
     "author": "admin",
-    "publicationDate": "2023-06-04"
+    "publicationDate": "2023-06-12"
 }
 ###
 

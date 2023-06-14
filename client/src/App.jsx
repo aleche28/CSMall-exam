@@ -14,6 +14,8 @@ import { LoginForm } from "./components/LoginForm";
 import UserContext from "./UserContext";
 
 import "bootstrap/dist/css/bootstrap.min.css";
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
 import { RegisterForm } from "./components/RegisterForm";
 import { ViewPage } from "./components/ViewPage";
 import { BackOffice } from "./components/BackOffice";

@@ -76,3 +76,15 @@ exports.createUser = (username, email, password) => {
     });
   });
 };
+
+exports.getAllUsers = () => {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT * FROM users";
+    db.all(sql, (err, rows) => {
+      if (err) reject(err);
+
+      const users = rows.map((r) => r.username);
+      resolve(users);
+    });
+  });
+};

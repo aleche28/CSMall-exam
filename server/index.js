@@ -39,6 +39,8 @@ app.use('/api', authRouter);
 app.use('/api', pagesRouter);
 app.use('/api', blocksRouter);
 
+/* enable static files handling */
+app.use("/api/static", express.static("public"));
 
 const PORT = 3000;
 
