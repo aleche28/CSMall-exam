@@ -161,4 +161,51 @@ async function getUsers(pageId) {
   }
 }
 
-export { login, register, logout, getPublished, getAll, getPublishedPage, getPage, getUsers, APIURL };
+async function updatePageAdmin(pageId, newPage) {
+  try {
+    const response = await fetch(APIURL + `/pages/${pageId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(newPage),
+    });
+
+    if (response.ok) {
+      const updatedPage = await response.json();
+      return updatedPage;
+    } else {
+      const res = await response.json();
+      throw new Error(res.error);
+    }
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+async function updatePage(authorId, pageId, newPage) {
+  try {
+    const response = await fetch(APIURL + `/author/${authorId}/pages/${pageId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(newPage),
+    });
+
+    if (response.ok) {
+      const updatedPage = await response.json();
+      return updatedPage;
+    } else {
+      const res = await response.json();
+      throw new Error(res.error);
+    }
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+export { login, register, logout, getPublished, getAll, 
+          getPublishedPage, getPage, getUsers, updatePageAdmin, updatePage, APIURL };

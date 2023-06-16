@@ -72,21 +72,24 @@ function MainLayout(props) {
                 CMSmall
               </Link>
             </Navbar.Brand>
-            
-            <Nav.Item>
-              <Nav.Link as={Link} to={"/back-office"}>Back-Office</Nav.Link>
-            </Nav.Item>
-
-            <Navbar.Text>
-              {user ? (
-                <span>
-                  {user.username}{" "}
-                  <Link onClick={props.handleLogout}>Logout</Link>
-                </span>
-              ) : (
-                <Link to="/login">Login</Link>
-              )}
-            </Navbar.Text>
+            <Navbar.Toggle aria-controls="navbar" />
+              <Navbar.Collapse id="navbar">
+                <Nav className="me-auto">
+                  <Nav.Link as={Link} to={"/"}>Home</Nav.Link>
+                  <Nav.Link as={Link} to={"/back-office"}>Back-Office</Nav.Link>
+                </Nav>
+                <Navbar.Text className="m-0 p-0">
+                {user ? (
+                  <>
+                    <i className="bi bi-person-circle"></i>{" "}
+                    <span>{user.username}</span>{" "}
+                    <Link className="text-decoration-none ms-3" onClick={props.handleLogout}>Logout</Link>
+                  </>
+                ) : (
+                  <Nav.Link as={Link} to="/login">Login</Nav.Link>
+                )}
+              </Navbar.Text>
+            </Navbar.Collapse>
           </Container>
         </Navbar>
       </header>

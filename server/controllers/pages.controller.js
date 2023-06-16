@@ -1,6 +1,7 @@
 "use strict";
 
 const pagesDAO = require("../dao/pages.dao");
+const blocksDAO = require("../dao/blocks.dao");
 const dayjs = require("dayjs");
 
 const dateFormat = "YYYY-MM-DD";
@@ -84,6 +85,13 @@ exports.createPage = async (req, res) => {
 
 exports.updatePage = async (req, res) => {
   try {
+    // blocks updated only if an array of new blocks is passed
+    if (req.body.blocks) {
+      // first delete all old blocks, then add all the new ones
+      await blocksDAO.deleteAllPageBlocks(req.params.pageId);
+      req.body.blocks.forEach(async (b) => await blocksDAO.createBlock({...b, page: req.params.pageId}));
+    }
+
     const body = {
       title: req.body.title,
       author: req.body.author,
