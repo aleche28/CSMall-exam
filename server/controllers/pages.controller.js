@@ -76,7 +76,10 @@ exports.createPage = async (req, res) => {
       publicationDate:
         (req.publicationDate && dayjs(req.publicationDate).format(dateFormat)) || null,
     };
-    const newPage = await pagesDAO.createPage(body);
+    let newPage = await pagesDAO.createPage(body);
+    req.body.blocks.forEach(async (b) => await blocksDAO.createBlock({...b, page: newPage.id}));
+    
+    newPage = await pagesDAO.getPageById(newPage.id);
     res.json(newPage);
   } catch (err) {
     res.status(500).json({ error: err.message });

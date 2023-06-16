@@ -1,27 +1,43 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { getPage, getUsers, updatePageAdmin } from "../API";
+import { getPage, getUsers, updatePageAdmin, updatePage } from "../API";
 import { useContext, useEffect, useState } from "react";
 import { Alert, Button, Col, Container, Form, Row } from "react-bootstrap";
 import UserContext from "../UserContext";
 import dayjs from "dayjs";
+import { EditBlocks } from "./EditBlocks";
 
 function EditPage(props) {
+  const user = useContext(UserContext);
+
+  // store page fetched from db
   const [page, setPage] = useState(undefined);
-  const [errMsg, setErrMsg] = useState("");
+  // store list of all users, so that admin can change authorship
+  const [users, setUsers] = useState([]);
+
   const [loading, setLoading] = useState(true);
 
-  const [users, setUsers] = useState([]);
+  // store error/info messages to show them in an alert
+  const [errMsg, setErrMsg] = useState("");
+  const [infoMsg, setInfoMsg] = useState("");
+
+  // store values of the input forms
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [pubDate, setPubDate] = useState("");
   const [blocks, setBlocks] = useState([]);
 
+  /* 
+   * If dirty is set (some info of the page has been modified),
+   * then the "save" button is enable and, on click,
+   * the page is updated in the db with the edited info from the forms
+   */
   const [dirty, setDirty] = useState(false);
+
+  /* 
+   * Updating the page blocks is an expensive operation, so if the blocks
+   * have not been modified, the update of the page will not update the blocks
+   */ 
   const [dirtyBlocks, setDirtyBlocks] = useState(false);
-
-  const [infoMsg, setInfoMsg] = useState("");
-
-  const user = useContext(UserContext);
 
   const { pageId } = useParams();
   const navigate = useNavigate();
@@ -47,7 +63,7 @@ function EditPage(props) {
     }
   }, [user, pageId]);
 
-  // update the fields of the forms when the pages changes (e.g. after saving)
+  // update the fields of the input forms when the pages changes (e.g. after saving/loading)
   useEffect(() => {
     if (page) {
       setDirty(false);
@@ -55,11 +71,11 @@ function EditPage(props) {
       setTitle(page.title);
       setAuthor(page.author);
       setPubDate(page.publicationDate);
-      setBlocks((old) => page.blocks);
+      setBlocks(page.blocks);
     }
   }, [page])
 
-  // get the list of all users to fill in the author select
+  // fetch the list of all users to fill in the author select menu
   useEffect(() => {
     async function fetchUsers() {
       try {
@@ -77,6 +93,7 @@ function EditPage(props) {
     fetchUsers();
   }, [user])
 
+  // reset all input forms to the original values
   function handleReset() {
     setDirty(false);
     setDirtyBlocks(false);
@@ -86,36 +103,39 @@ function EditPage(props) {
     setBlocks(page.blocks);
   }
 
-  function handleSave() {
+  // 
+  async function handleSave() {
+    if (
+      !blocks.some((b) => b.type === "header") ||
+      !blocks.some((b) => b.type !== "header")
+    ) {
+      setErrMsg("There must be at least one header block and an image/paragraph block.");
+      return;
+    }
+
     const newPage = {
       title: title,
       author: author,
       publicationDate: pubDate, // formatting done at API level
       blocks: dirtyBlocks ? blocks : undefined // pass the blocks array only if it has been modified
-    }
-    if (user.role === "Admin") {
-      updatePageAdmin(pageId, newPage)
-        .then((p) => {
-          setDirty(false);
-          setDirtyBlocks(false);
-          setPage(p);
-          setInfoMsg("Page saved successfully.");
-        })
-        .catch((err) => setErrMsg(err.message));
-    } else {
-      updatePage(author, pageId, newPage)
-        .then((p) => {
-          setDirty(false);
-          setDirtyBlocks(false);
-          setPage(p);
-          setInfoMsg("Page saved successfully.");
-        })
-        .catch((err) => setErrMsg(err.message));
+    };
+    
+    try {
+      const updatedPage = user.role === "Admin"
+        ? await updatePageAdmin(pageId, newPage)
+        : await updatePage(author, pageId, newPage);
+
+      setDirty(false);
+      setDirtyBlocks(false);
+      setPage(updatedPage);
+      setInfoMsg("Page saved successfully.");
+    } catch (err) {
+      setErrMsg(err.message);
     }
   }
 
   function handleUpdateBlocks(newBlocks) {
-    setBlocks((old) => newBlocks);
+    setBlocks(newBlocks);
     setDirty(true);
     setDirtyBlocks(true);
   }
@@ -126,7 +146,7 @@ function EditPage(props) {
       { // show error alert if there are errors after loading
         loading ? 
           ("Loading...") : 
-          ( errMsg && <Alert key={"danger"} variant="danger"> {errMsg} </Alert>)
+          ( errMsg && <Alert key={"danger"} variant="danger" onClose={() => setErrMsg("")} dismissible> {errMsg} </Alert>)
       }
       
       {infoMsg && <Alert key={"success"} variant="success" onClose={() => setInfoMsg("")} dismissible> {infoMsg} </Alert>}
@@ -134,39 +154,56 @@ function EditPage(props) {
       {!loading && page && user &&
         <>
           <Form>
+            
             <Col xs="5">
-                <Form.Group className="mb-4">
+                <Form.Group className="mb-4" controlId="formTitle">
                   <Form.Label>Title</Form.Label>
-                  <Form.Control type="text" required={true} value={title} onChange={(ev) => {setTitle(ev.target.value); setDirty(true);}}/>
+                  <Form.Control type="text" required={true} value={title} 
+                    onChange={(ev) => {
+                      setTitle(ev.target.value);
+                      setDirty(true);
+                    }}/>
                 </Form.Group>
             </Col>
+
             <Col xs="2">
-              <Form.Group className="mb-4">
+              <Form.Group className="mb-4" controlId="formAuthor">
                 <Form.Label>Author</Form.Label>
-                <Form.Select disabled={user.role !== "Admin"} value={author} onChange={(ev) => {setAuthor(ev.target.value); setDirty(true);}}>
+                <Form.Select disabled={user.role !== "Admin"} value={author}
+                  onChange={(ev) => {
+                    setAuthor(ev.target.value);
+                    setDirty(true);
+                  }}>
                   {!users.length && <option key={author} value={author}>{author}</option>}
                   {users.length && users.map((u) => <option key={u} value={u}>{u}</option>)}
                 </Form.Select>
               </Form.Group>
             </Col>
+            
             <Col xs="5">
-                <Form.Group className="mb-4">
+                <Form.Group className="mb-4" controlId="formCreationDate">
                   <Form.Label>Creation date</Form.Label>
                   <Form.Control disabled type="date" required={true} defaultValue={page.creationDate}/>
                 </Form.Group>
             </Col>
+
             <Col xs="5">
-                <Form.Group className="mb-4">
+                <Form.Group className="mb-4" controlId="formPublicationDate">
                   <Form.Label>Publication date</Form.Label>
-                  <Form.Control type="date" min={dayjs().format("YYYY-MM-DD")} required={true} value={pubDate || ""} onChange={(ev) => {setPubDate(ev.target.value); setDirty(true);}}/>
+                  <Form.Control type="date" required={true} value={pubDate || ""}
+                    min={dayjs().format("YYYY-MM-DD")}
+                    onChange={(ev) => {
+                      setPubDate(ev.target.value);
+                      setDirty(true);
+                    }}/>
                 </Form.Group>
             </Col>
+
             <Form.Group className="mb-4">
-              <Form.Label>Content blocks</Form.Label>
+              <Form.Label>Content blocks</Form.Label><br/>
+              <EditBlocks blocks={blocks} updateBlocks={handleUpdateBlocks}/>
             </Form.Group>
 
-            <EditBlocks blocks={blocks} updateBlocks={handleUpdateBlocks}/>
-            
             <Container className="form-buttons pt-3 pb-5">
               <Button variant="danger" className="mx-3" size="lg" onClick={() => handleReset()}>Reset</Button>
               <Button variant="secondary" className="mx-3" size="lg" onClick={() => navigate(-1)}>Cancel</Button>
@@ -177,151 +214,6 @@ function EditPage(props) {
       }
     </>
   );
-}
-
-function EditBlocks(props) {
-  const [blocks, setBlocks] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [dirty, setDirty] = useState(false);
-  
-  useEffect(() => {
-    setBlocks(props.blocks);
-  }, [props])
-
-  useEffect(() => {
-    if (dirty) {
-      props.updateBlocks(blocks);
-      setDirty(false);
-    }
-  }, [dirty])
-
-  function moveUp(oldPosition) {
-    setBlocks((oldBlocks) =>
-      oldBlocks.map((b) => {
-        if (b.position === oldPosition)
-          return {...b, position: oldPosition-1};
-        if (b.position === (oldPosition-1))
-          return {...b, position: oldPosition};
-        return b;
-      })
-    )
-    setDirty(true);
-  }
-
-  function moveDown(oldPosition) {
-    setBlocks((oldBlocks) =>
-      oldBlocks.map((b) => {
-        if (b.position === oldPosition)
-          return {...b, position: oldPosition+1};
-        if (b.position === (oldPosition+1))
-          return {...b, position: oldPosition};
-        return b;
-      })
-    )
-    setDirty(true);
-  }
-
-  function deleteBlock(position) {
-    setBlocks((oldBlocks) => {
-      const newBlocks = [];
-      oldBlocks.forEach((b) => {
-        if (b.position === position)
-          return;
-        if (b.position > position)
-          return newBlocks.push({...b, position: b.position-1});
-        return newBlocks.push(b);
-      });
-      return newBlocks;
-    })
-    setDirty(true);
-  }
-
-  function addBlock(type, content) {
-    console.log("Called addBlock with: " + type + " and " + content);
-    setBlocks((oldBlocks) => {
-      const maxPos = oldBlocks.length ? Math.max(...oldBlocks.map((b) => b.position)) : 0;
-      const newBlocks = [...oldBlocks];
-      newBlocks.push({ id: maxPos+1, position: maxPos+1, type: type, content: content });
-      return newBlocks;
-    });
-    setShowForm(false);
-    setDirty(true);
-  }
-
-  return (
-    <>
-      {blocks
-        .sort((a, b) => a.position - b.position)
-        .map((b) => 
-          <BlockRow key={b.position} block={b} numBlocks={blocks.length}
-            moveUp={moveUp} moveDown={moveDown}
-            deleteBlock={deleteBlock}/>)}
-      {showForm && <NewBlockForm addBlock={addBlock} closeForm={() => setShowForm(false)}></NewBlockForm>}
-      {!showForm && <Button variant="primary" onClick={() => setShowForm(true)}>Add content block</Button>}
-    </>
-  )
-}
-
-function BlockRow(props) {
-  return (
-    <>
-      <Row className="page-row my-3 py-3 ps-5 pe-3 border rounded">
-        <Col xs={1}>{props.block.position}</Col>
-        <Col>
-          <Row>{props.block.type}</Row>
-          <Row>{props.block.content}</Row>
-        </Col>
-        <Col xs={1}>
-            <Button disabled={props.block.position === 1} variant="primary" className="mb-1" onClick={() => props.moveUp(props.block.position)}>
-              <i className="bi bi-arrow-up"></i>
-            </Button>
-            <Button disabled={props.block.position === props.numBlocks} variant="primary" className="mb-1" onClick={() => props.moveDown(props.block.position)}>
-              <i className="bi bi-arrow-down"></i>
-            </Button>
-        </Col>
-        <Col xs={1}>
-          <Button variant="danger" onClick={() => props.deleteBlock(props.block.position)}>
-            <i className="bi bi-trash3"></i>
-          </Button>
-        </Col>
-      </Row>
-    </>
-  )
-}
-
-function NewBlockForm(props) {
-  const [type, setType] = useState("header");
-  const [content, setContent] = useState("");
-
-  return (
-    <>
-      <Row className="page-row my-3 py-3 ps-5 pe-3 border rounded">
-        <Col>
-          <Form.Group className="mb-2">
-            <Form.Label>Type</Form.Label>
-            <Form.Select value={type} onChange={(ev) => {console.log(type);setType(ev.target.value)}}>
-              <option key={"header"} value={"header"}>Header</option>
-              <option key={"paragraph"} value={"paragraph"}>Paragraph</option>
-              <option key={"image"} value={"image"}>Image</option>
-            </Form.Select>
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Content</Form.Label>
-            <Form.Control as="textarea" rows={type === "header" ? 1 : 3} 
-              value={content} onChange={(ev) => setContent(ev.target.value)} />
-          </Form.Group>
-        </Col>
-        <Col xs={1}>
-          <Button variant="danger" onClick={() => props.closeForm()}>
-            <i className="bi bi-trash3"></i>
-          </Button>
-          <Button variant="success" onClick={() => {props.addBlock(type, content)}}>
-            <i className="bi bi-check-lg"></i>
-          </Button>
-        </Col>
-      </Row>
-    </>
-  )
 }
 
 export { EditPage };

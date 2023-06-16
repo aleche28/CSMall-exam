@@ -33,7 +33,7 @@ function BackOffice(props) {
       <Container fluid className="pages-list col-md-10">
         {errMsg && <Alert key={"danger"} variant={"danger"}>{errMsg}</Alert>}
         {pages && pages.map((p) => <PageRow key={p.id} page={p} />)}
-        <Link className="btn btn-primary btn-lg fixed-right-bottom" to="/back-office/add" /* state={{nextpage: location.pathname}} */> &#43; </Link>
+        <Link className="btn btn-primary btn-lg fixed-right-bottom" to="/back-office/add"> &#43; </Link>
       </Container>
     </>
   );
@@ -41,7 +41,6 @@ function BackOffice(props) {
 
 function PageRow(props) {
   const page = props.page;
-  const navigate = useNavigate();
 
   return (
     <>

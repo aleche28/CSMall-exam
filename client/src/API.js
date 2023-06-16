@@ -207,5 +207,29 @@ async function updatePage(authorId, pageId, newPage) {
   }
 }
 
+async function createPage(page) {
+  try {
+    const response = await fetch(APIURL + `/pages`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(page),
+    });
+
+    if (response.ok) {
+      const newPage = await response.json();
+      return newPage;
+    } else {
+      const res = await response.json();
+      console.log(res);
+      throw new Error(res.error);
+    }
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
 export { login, register, logout, getPublished, getAll, 
-          getPublishedPage, getPage, getUsers, updatePageAdmin, updatePage, APIURL };
+          getPublishedPage, getPage, getUsers, updatePageAdmin, updatePage, createPage, APIURL };
