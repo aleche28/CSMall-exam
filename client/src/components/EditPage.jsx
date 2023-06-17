@@ -14,6 +14,8 @@ function EditPage(props) {
   // store list of all users, so that admin can change authorship
   const [users, setUsers] = useState([]);
 
+  const [images, setImages] = useState([]);
+
   const [loading, setLoading] = useState(true);
 
   // store error/info messages to show them in an alert
@@ -92,6 +94,23 @@ function EditPage(props) {
 
     fetchUsers();
   }, [user])
+
+  // fetch images that can be used in the blocks:
+  // images are fetched here at the highest level to reduce the number of calls to the API, 
+  // because we assume that the list of images doesn't change
+  useEffect(() => {
+    async function fetchImages() {
+      try {
+        const list = await getImages();
+        setImages(list);
+      } catch (err) {
+        console.log(err);
+        setImages([]);
+      }
+    }
+
+    fetchImages();
+  }, []);
 
   // reset all input forms to the original values
   function handleReset() {

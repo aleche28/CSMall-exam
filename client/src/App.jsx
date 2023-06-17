@@ -24,8 +24,6 @@ import { AddPage } from "./components/AddPage";
 function App() {
   const [user, setUser] = useState(undefined);
 
-  const [images, setImages] = useState([]);
-
   const checkLogin = async (username, password) => {
     const res = await login(username, password);
     setUser(res.user);
@@ -35,23 +33,6 @@ function App() {
     await logout();
     setUser(undefined);
   };
-
-  // fetch images that can be used in the blocks:
-  // images are fetched here at the highest level to reduce the number of calls to the API, 
-  // because we assume that the list of images doesn't change
-  useEffect(() => {
-    async function fetchImages() {
-      try {
-        const list = await getImages();
-        setImages(list);
-      } catch (err) {
-        console.log(err);
-        setImages([]);
-      }
-    }
-
-    fetchImages();
-  }, []);
 
   // prettier-ignore
   return (
@@ -64,8 +45,8 @@ function App() {
               <Route path="pages/:pageId" element={<ViewPage />} />
               <Route path="back-office" element={<BackOffice />} />
               <Route path="back-office/pages/:pageId" element={<ViewPage />} />
-              <Route path="back-office/edit/:pageId" element={<EditPage images={images} />} />
-              <Route path="back-office/add" element={<AddPage images={images} />} />
+              <Route path="back-office/edit/:pageId" element={<EditPage />} />
+              <Route path="back-office/add" element={<AddPage />} />
               <Route path="login" element={<LoginForm checkLogin={checkLogin} />} />
               <Route path="register" element={<RegisterForm/>} />
               <Route path="*" element={/*<PageNotFound />*/ <h1>Page not found</h1>} />
