@@ -223,7 +223,44 @@ async function createPage(page) {
       return newPage;
     } else {
       const res = await response.json();
-      console.log(res);
+      throw new Error(res.error);
+    }
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+async function deletePageAdmin(pageId) {
+  try {
+    const response = await fetch(APIURL + `/pages/${pageId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      return result;
+    } else {
+      const res = await response.json();
+      throw new Error(res.error);
+    }
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+async function deletePageAuthor(pageId, authorId) {
+  try {
+    const response = await fetch(APIURL + `/authors/${authorId}/pages/${pageId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      return result;
+    } else {
+      const res = await response.json();
       throw new Error(res.error);
     }
   } catch (err) {
@@ -232,4 +269,6 @@ async function createPage(page) {
 }
 
 export { login, register, logout, getPublished, getAll, 
-          getPublishedPage, getPage, getUsers, updatePageAdmin, updatePage, createPage, APIURL };
+          getPublishedPage, getPage, getUsers, updatePageAdmin,
+          updatePage, createPage, deletePageAdmin, deletePageAuthor,
+          APIURL };

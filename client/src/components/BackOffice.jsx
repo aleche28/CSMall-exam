@@ -1,5 +1,5 @@
-import { Col, Row, Container, Alert } from "react-bootstrap";
-import { getAll } from "../API";
+import { Col, Row, Container, Alert, Button, Spinner } from "react-bootstrap";
+import { getAll, deletePageAdmin, deletePageAuthor } from "../API";
 import { useEffect, useState, useContext } from "react";
 import UserContext from "../UserContext";
 import { Link, useNavigate } from "react-router-dom";
@@ -8,32 +8,67 @@ import dayjs from "dayjs";
 function BackOffice(props) {
   const [pages, setPages] = useState([]);
   const [errMsg, setErrMsg] = useState("");
+  const [infoMsg, setInfoMsg] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const user = useContext(UserContext);
 
   const navigate = useNavigate();
 
-  useEffect(() => {
+  async function fetchPages(user) {
     if (user) {
-      getAll()
-      .then((list) => {
+      try {
+        const pages = await getAll();
         setErrMsg("");
-        setPages(list);
-      })
-      .catch((err) => {
+        setPages(pages);
+      } catch(err) {
         setErrMsg(err.message);
-      });
+      }
+      setLoading(false);
     } else {
       navigate("/login");
     }
+  }
+
+  useEffect(() => {
+    fetchPages(user);
   }, [user]);
+
+  async function handleDelete(pageId, author) {
+    console.log("called");
+    try {
+      user.role === "Admin"
+        ? await deletePageAdmin(pageId)
+        : await deletePageAuthor(pageId, author);
+
+      setInfoMsg("Page deleted successfully.");
+      fetchPages(user);
+    } catch (err) {
+      setErrMsg(err.message);
+    }
+  }
 
   return (
     <>
       <Container fluid className="pages-list col-md-10">
-        {errMsg && <Alert key={"danger"} variant={"danger"}>{errMsg}</Alert>}
-        {pages && pages.map((p) => <PageRow key={p.id} page={p} />)}
-        <Link className="btn btn-primary btn-lg fixed-right-bottom" to="/back-office/add"> &#43; </Link>
+        {!loading && errMsg &&
+          <Alert key={"danger"} variant="danger" onClose={() => setErrMsg("")} dismissible> {errMsg} </Alert>}
+
+        {!loading && infoMsg &&
+          <Alert key={"success"} variant="success" onClose={() => setInfoMsg("")} dismissible> {infoMsg} </Alert>}
+
+        {loading && 
+          <Container className="d-flex my-5 justify-content-center">
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+          </Container>}
+
+        {!loading && pages && 
+          <>
+            {pages.sort((a, b) => b.creationDate.localeCompare(a.creationDate)).map((p) => <PageRow key={p.id} page={p} deletePage={handleDelete}/>)}
+            <Link className="btn btn-primary btn-lg fixed-right-bottom" to="/back-office/add"> &#43; </Link>
+          </>}
       </Container>
     </>
   );
@@ -41,6 +76,8 @@ function BackOffice(props) {
 
 function PageRow(props) {
   const page = props.page;
+  const user = useContext(UserContext);
+  const navigate = useNavigate();
 
   return (
     <>
@@ -69,9 +106,16 @@ function PageRow(props) {
           </Link>
         </Col>
         <Col xs={1} className="page-row-btn">
-          <Link className="btn btn-primary circular-button" to={`/back-office/edit/${page.id}`}>
+          <Button variant={"primary"} className="circular-button" onClick={() => navigate(`/back-office/edit/${page.id}`)}
+            disabled={user && user.role !== "Admin" && page.author !== user.username}>
             <i className="bi bi-pencil-fill"></i>
-          </Link>
+          </Button>
+        </Col>
+        <Col xs={1} className="page-row-btn">
+          <Button variant={"danger"} className="circular-button" onClick={() => props.deletePage(page.id, page.author)}
+            disabled={user && user.role !== "Admin" && page.author !== user.username}>
+            <i className="bi bi-trash3"></i>
+          </Button>
         </Col>
       </Row>
     </>

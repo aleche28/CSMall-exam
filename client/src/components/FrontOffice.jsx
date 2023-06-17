@@ -1,21 +1,46 @@
-import { Col, Row, Container } from "react-bootstrap";
+import { Col, Row, Container, Alert, Spinner } from "react-bootstrap";
 import { getPublished } from "../API";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function FrontOffice(props) {
   const [pages, setPages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errMsg, setErrMsg] = useState("");
 
   useEffect(() => {
-    getPublished().then((list) => {
-      setPages(list);
-    });
+    async function fetchPublished() {
+      try {
+        const list = await getPublished();
+        setErrMsg("");
+        setPages(list);
+      } catch (err) {
+        setErrMsg(err.message);
+        setPages([]);
+      }
+      setLoading(false);
+    }
+    
+    fetchPublished();
   }, []);
 
   return (
     <>
       <Container fluid className="col-sm-8">
-        {pages && pages.map((p) => <PublishedPageRow key={p.id} page={p} />)}
+        {loading &&
+          <Container className="d-flex my-5 justify-content-center">
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+          </Container>}
+
+        {!loading && errMsg &&
+          <Alert key={"danger"} variant="danger" onClose={() => setErrMsg("")} dismissible> {errMsg} </Alert>}
+
+        {!loading && pages &&
+          pages
+            .sort((a, b) => b.publicationDate.localeCompare(a.publicationDate))
+            .map((p) => <PublishedPageRow key={p.id} page={p} />)}
       </Container>
     </>
   );

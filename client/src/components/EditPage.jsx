@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { getPage, getUsers, updatePageAdmin, updatePage } from "../API";
+import { getPage, getUsers, updatePageAdmin, updatePage, deletePageAdmin, deletePageAuthor } from "../API";
 import { useContext, useEffect, useState } from "react";
-import { Alert, Button, Col, Container, Form, Row } from "react-bootstrap";
+import { Alert, Button, Col, Container, Form, Row, Spinner } from "react-bootstrap";
 import UserContext from "../UserContext";
 import dayjs from "dayjs";
 import { EditBlocks } from "./EditBlocks";
@@ -134,6 +134,20 @@ function EditPage(props) {
     }
   }
 
+  async function handleDelete() {
+    try {
+      user.role === "Admin"
+        ? await deletePageAdmin(pageId)
+        : await deletePageAuthor(pageId, author);
+
+      setLoading(true);
+      setInfoMsg("Page deleted successfully.\nYou are being redirected to the back-office main page...");
+      setTimeout(() => navigate("/back-office"), 2000);
+    } catch (err) {
+      setErrMsg(err.message);
+    }
+  }
+
   function handleUpdateBlocks(newBlocks) {
     setBlocks(newBlocks);
     setDirty(true);
@@ -143,13 +157,18 @@ function EditPage(props) {
   return (
     // prettier-ignore
     <>
+      {infoMsg && <Alert key={"success"} variant="success" onClose={() => setInfoMsg("")} dismissible> {infoMsg} </Alert>}
+
+      
       { // show error alert if there are errors after loading
         loading ? 
-          ("Loading...") : 
+          <Container className="d-flex my-5 justify-content-center">
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+          </Container> :
           ( errMsg && <Alert key={"danger"} variant="danger" onClose={() => setErrMsg("")} dismissible> {errMsg} </Alert>)
       }
-      
-      {infoMsg && <Alert key={"success"} variant="success" onClose={() => setInfoMsg("")} dismissible> {infoMsg} </Alert>}
 
       {!loading && page && user &&
         <>
@@ -205,9 +224,12 @@ function EditPage(props) {
             </Form.Group>
 
             <Container className="form-buttons pt-3 pb-5">
-              <Button variant="danger" className="mx-3" size="lg" onClick={() => handleReset()}>Reset</Button>
+              <Button variant="warning" className="mx-3" size="lg" onClick={() => handleReset()}>Reset</Button>
               <Button variant="secondary" className="mx-3" size="lg" onClick={() => navigate(-1)}>Cancel</Button>
               <Button variant="primary" className="mx-3" size="lg" onClick={() => handleSave()} disabled={!dirty}>Save</Button>
+            </Container>
+            <Container className="form-buttons pb-5">
+              <Button variant="danger" className="mx-3" size="lg" onClick={() => handleDelete()}>Delete page</Button>
             </Container>
           </Form>
         </>

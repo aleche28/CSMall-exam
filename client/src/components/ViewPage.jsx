@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { getPage, getPublishedPage, APIURL } from "../API";
 import UserContext from "../UserContext";
-import { Alert, Button, Col, Container, Row } from "react-bootstrap";
+import { Alert, Button, Col, Container, Row, Spinner } from "react-bootstrap";
 import dayjs from "dayjs";
 
 function ViewPage(props) {
@@ -57,14 +57,20 @@ function ViewPage(props) {
     <>
       { // show error alert if there are errors after loading
         loading ? 
-          ("Loading...") : 
+          <Container className="d-flex my-5 justify-content-center">
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+          </Container> : 
           ( errMsg && <Alert key={"danger"} variant="danger"> {errMsg} </Alert>)
       }
       
       {!loading && page && <Page page={page} />}
       
       { // show the edit button if the user is authenticated and the route is /back-office/...
-        !loading && user && page && location.pathname === `/back-office/pages/${pageId}` &&
+        !loading && user && page &&
+          location.pathname === `/back-office/pages/${pageId}` &&
+          (user.role === "Admin" || user.username === page.author) &&
           <Link className="btn btn-primary btn-lg fixed-right-bottom" to={`/back-office/edit/${pageId}`}/* state={{nextpage: location.pathname}} */>
             <i className="bi bi-pencil-fill"></i>
           </Link>

@@ -57,7 +57,7 @@ exports.getAllPages = () => {
       b.id as blockId, type, position, content\
       FROM pages p LEFT JOIN blocks b\
       ON b.page = p.id\
-      ORDER BY p.id, position";
+      ORDER BY p.id";
     db.all(sql, (err, rows) => {
       if (err) reject(err);
 
@@ -76,7 +76,7 @@ exports.getAllPublishedPages = () => {
       FROM pages p LEFT JOIN blocks b\
       ON b.page = p.id\
       WHERE publication_date <= ?\
-      ORDER BY p.id, position";
+      ORDER BY p.id";
     db.all(sql, [today], (err, rows) => {
       if (err) reject(err);
 
@@ -96,7 +96,7 @@ exports.getAllPagesByAuthor = (authorId) => {
       FROM pages p LEFT JOIN blocks b\
       ON b.page = p.id\
       WHERE author = ?\
-      ORDER BY p.id, position";
+      ORDER BY p.id";
     db.all(sql, [authorId], (err, rows) => {
       if (err) reject(err);
 
@@ -114,7 +114,7 @@ exports.getPageById = (pageId) => {
       FROM pages p LEFT JOIN blocks b\
       ON b.page = p.id\
       WHERE p.id = ?\
-      ORDER BY p.id, position";
+      ORDER BY p.id";
     db.all(sql, [pageId], (err, rows) => {
       if (err) reject(err);
 
