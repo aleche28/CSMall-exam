@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { getPage, getUsers, updatePageAdmin, updatePage, deletePageAdmin, deletePageAuthor } from "../API";
 import { useContext, useEffect, useState } from "react";
-import { Alert, Button, Col, Container, Form, Row, Spinner } from "react-bootstrap";
+import { Alert, Button, Col, Container, Form, Spinner } from "react-bootstrap";
 import UserContext from "../UserContext";
 import dayjs from "dayjs";
 import { EditBlocks } from "./EditBlocks";

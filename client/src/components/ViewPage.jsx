@@ -1,13 +1,16 @@
 import { useContext, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import { getPage, getPublishedPage, APIURL } from "../API";
+import { getPage, getPublishedPage, APIURL, updatePage, updatePageAdmin } from "../API";
 import UserContext from "../UserContext";
-import { Alert, Button, Col, Container, Row, Spinner } from "react-bootstrap";
+import { Alert, Button, Container, Row, Spinner } from "react-bootstrap";
 import dayjs from "dayjs";
 
 function ViewPage(props) {
   const [page, setPage] = useState(undefined);
+
   const [errMsg, setErrMsg] = useState("");
+  const [infoMsg, setInfoMsg] = useState("");
+
   const [loading, setLoading] = useState(true);
 
   const user = useContext(UserContext);
@@ -16,55 +19,69 @@ function ViewPage(props) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
-    if (location.pathname === `/pages/${pageId}`) {
-      //published page: auth not required
-      getPublishedPage(Number(pageId))
-        .then((p) => {
-          setErrMsg("");
-          setPage(p);
-          setLoading(false);
-        })
-        .catch((err) => {
-          setErrMsg(err.message);
-          setLoading(false);
-        });
-    } else {
-      // back-office page view: auth required
-      if (user) {
-        getPage(Number(pageId))
-          .then((p) => {
-            setPage(p);
-            setErrMsg("");
-            setLoading(false);
-          })
-          .catch((err) => {
-            setErrMsg(err.message);
-            setLoading(false);
-          });
+  async function fetchPage() {
+    try {
+      setLoading(true);
+
+      let fetchedPage;
+      if (location.pathname === `/pages/${pageId}`) {
+        fetchedPage = await getPublishedPage(Number(pageId));
       } else {
-        navigate("/login");
+        if (!user) {
+          navigate("/login");
+          return;
+        }
+        fetchedPage = await getPage(Number(pageId));
       }
+
+      setPage(fetchedPage);
+      setErrMsg("");
+    } catch (err) {
+      setPage(undefined);
+      setErrMsg(err.message);
+    } finally {
+      setLoading(false);
     }
-  }, [user]);
+  };
 
-  function handlePublish() {
+  useEffect(() => {
+    fetchPage();    
+  }, [user, pageId]);
 
+  async function handlePublish() {
+    try {
+      setLoading(true);
+
+      const publishedPage = { ...page, publicationDate: dayjs().format("YYYY-MM-DD") };
+      user.role === "Admin" ?
+        await updatePageAdmin(pageId, publishedPage) :
+        await updatePage(page.author, pageId, publishedPage);
+      
+      fetchPage();
+      setInfoMsg("Page has been published.");
+    } catch(err) {
+      // the error caught here is from the updatePage, because the errors in fetchPage are already handled inside it
+      setErrMsg(err.message + " Page hasn't been published.");
+      setLoading(false);
+    }
   }
 
   return (
     // prettier-ignore
     <>
-      { // show error alert if there are errors after loading
-        loading ? 
-          <Container className="d-flex my-5 justify-content-center">
-            <Spinner animation="border" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </Spinner>
-          </Container> : 
-          ( errMsg && <Alert key={"danger"} variant="danger"> {errMsg} </Alert>)
-      }
-      
+      {!loading && errMsg &&
+        <Alert key={"danger"} variant="danger" onClose={() => setErrMsg("")} dismissible> {errMsg} </Alert>}
+
+      {!loading && infoMsg &&
+        <Alert key={"success"} variant="success" onClose={() => setInfoMsg("")} dismissible> {infoMsg} </Alert>}
+
+      {loading && 
+        <Container className="d-flex my-5 justify-content-center">
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+        </Container>}
+
       {!loading && page && <Page page={page} />}
       
       { // show the edit button if the user is authenticated and the route is /back-office/...
@@ -79,7 +96,7 @@ function ViewPage(props) {
       { // show the "publish now" button if the user is authenticated and is the author of the page
         !loading && user && page &&
           (!page.publicationDate || page.publicationDate > dayjs().format("YYYY-MM-DD")) &&
-          <Button disabled={user.username !== page.author} variant="primary" size="lg" className="fixed-left-bottom" onClick={() => handlePublish()} /* state={{nextpage: location.pathname}} */>
+          <Button disabled={user.username !== page.author} variant="primary" size="lg" className="fixed-left-bottom" onClick={() => handlePublish()}>
             Publish now
           </Button>
         }

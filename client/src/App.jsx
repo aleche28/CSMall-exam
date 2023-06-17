@@ -1,6 +1,6 @@
-import { useState, useEffect, useContext } from "react";
-import { Button, Col, Container, Navbar, Nav, Row } from "react-bootstrap";
-import { getPublished, login, logout } from "./API";
+import { useState, useContext } from "react";
+import { Container, Navbar, Nav } from "react-bootstrap";
+import { login, logout } from "./API";
 import { FrontOffice } from "./components/FrontOffice";
 import {
   BrowserRouter,
@@ -8,7 +8,6 @@ import {
   Outlet,
   Route,
   Routes,
-  useParams,
 } from "react-router-dom";
 import { LoginForm } from "./components/LoginForm";
 import UserContext from "./UserContext";

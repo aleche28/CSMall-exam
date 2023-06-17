@@ -23,8 +23,9 @@ function BackOffice(props) {
         setPages(pages);
       } catch(err) {
         setErrMsg(err.message);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     } else {
       navigate("/login");
     }
