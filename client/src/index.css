@@ -115,11 +115,30 @@
     justify-items: center;
 }
 
-img {
+.view-image {
     max-width: 20vw;
     max-height: auto;
 }
 
+.carousel-img {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    height: 20rem;
+    width: 30rem;
+}
+
 .bi-person-circle {
     font-size: 24px;
+}
+
+.block-position {
+    display: flex;
+    justify-items: center;
+    align-items: center;
+    font-weight: bold;
+}
+
+.block-type {
+    font-weight: bold;
 }

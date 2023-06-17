@@ -268,7 +268,23 @@ async function deletePageAuthor(pageId, authorId) {
   }
 }
 
+async function getImages() {
+  try {
+    const response = await fetch(APIURL + "/images");
+
+    if (response.ok) {
+      const list = await response.json();
+      return list;
+    } else {
+      const res = await response.json();
+      throw new Error(res.error);
+    }
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
 export { login, register, logout, getPublished, getAll, 
           getPublishedPage, getPage, getUsers, updatePageAdmin,
-          updatePage, createPage, deletePageAdmin, deletePageAuthor,
+          updatePage, createPage, deletePageAdmin, deletePageAuthor, getImages,
           APIURL };

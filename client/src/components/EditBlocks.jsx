@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Button, Col, Form, Row } from "react-bootstrap";
+import { Button, Carousel, Col, Container, Form, Row } from "react-bootstrap";
+import { APIURL } from "../API";
 
 function EditBlocks(props) {
   const [blocks, setBlocks] = useState([]);
@@ -78,7 +79,7 @@ function EditBlocks(props) {
             moveUp={moveUp}
             moveDown={moveDown}
             deleteBlock={deleteBlock}/>)}
-      {showForm && <NewBlockForm addBlock={addBlock} closeForm={() => setShowForm(false)}></NewBlockForm>}
+      {showForm && <NewBlockForm images={props.images} addBlock={addBlock} closeForm={() => setShowForm(false)}></NewBlockForm>}
       {!showForm && <Button variant="primary" onClick={() => setShowForm(true)}>Add content block</Button>}
     </>
   )
@@ -88,10 +89,14 @@ function BlockRow(props) {
   return (
     <>
       <Row className="page-row my-3 py-3 ps-5 pe-3 border rounded">
-        <Col xs={1}>{props.block.position}</Col>
+        <Col className="block-position" xs={1}>{props.block.position}</Col>
         <Col>
-          <Row>{props.block.type}</Row>
-          <Row>{props.block.content}</Row>
+          <Row className="ms-2 text-capitalize block-type">{props.block.type}</Row>
+          <hr/>
+          {props.block.type !== "image" ?
+            <Row className="ms-2 pt-3">{props.block.content}</Row> :
+            <img className="view-image" alt={props.block.content}
+              src={APIURL + "/static/images/" + props.block.content}/>}
         </Col>
 
         <Col xs={1}>
@@ -121,6 +126,14 @@ function BlockRow(props) {
 function NewBlockForm(props) {
   const [type, setType] = useState("header");
   const [content, setContent] = useState("");
+  const [index, setIndex] = useState(0);
+
+  const handleSelect = (selectedIndex) => {
+    setIndex(selectedIndex);
+    setContent(props.images[selectedIndex]);
+  };
+
+
 
   return (
     <>
@@ -135,11 +148,31 @@ function NewBlockForm(props) {
             </Form.Select>
           </Form.Group>
           
-          <Form.Group className="mb-3" controlId="formContent">
-            <Form.Label>Content</Form.Label>
-            <Form.Control as="textarea" rows={type === "header" ? 1 : 3} 
-              value={content} onChange={(ev) => setContent(ev.target.value)} />
-          </Form.Group>
+          {type !== "image" && 
+            <Form.Group className="mb-3" controlId="formContent">
+              <Form.Label>Content</Form.Label>
+              <Form.Control as="textarea" rows={type === "header" ? 1 : 3} 
+                value={content} onChange={(ev) => setContent(ev.target.value)} />
+            </Form.Group>}
+
+          {type === "image" && props.images &&
+            <Container className="d-flex flex-row justify-content-center">
+              <Carousel slide={false} interval={null} variant="dark"
+                activeIndex={index} onSelect={handleSelect}>
+                {props.images.map((img, idx) => 
+                  <Carousel.Item key={idx}>
+                    <div className="carousel-img m-5 pb-5">
+                      <img className="d-block h-100" alt={img}
+                        src={APIURL + "/static/images/" + img} />
+                    </div>
+                    <Carousel.Caption>
+                      <h5>{img}</h5>
+                    </Carousel.Caption>
+                </Carousel.Item>)}
+              </Carousel>
+            </Container>
+          }
+
         </Col>
         
         <Col xs={1}>

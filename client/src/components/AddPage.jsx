@@ -65,7 +65,6 @@ function AddPage(props) {
   // update the list of blocks at the upper level from the EditBlocks at lower level
   function handleUpdateBlocks(newBlocks) {
     setBlocks(newBlocks);
-    console.log(blocks);
   }
 
   return (
@@ -89,14 +88,14 @@ function AddPage(props) {
                 </Form.Group>
             </Col>
             
-            <Col xs="5">
+            <Col xs="2">
                 <Form.Group className="mb-4" controlId="formCreationDate">
                   <Form.Label>Creation date</Form.Label>
                   <Form.Control disabled type="date" defaultValue={dayjs().format("YYYY-MM-DD")}/>
                 </Form.Group>
             </Col>
 
-            <Col xs="5">
+            <Col xs="2">
                 <Form.Group className="mb-4" controlId="formPublicationDate">
                   <Form.Label>Publication date</Form.Label>
                   <Form.Control type="date" value={pubDate || ""}

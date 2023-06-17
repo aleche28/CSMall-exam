@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { getPage, getUsers, updatePageAdmin, updatePage, deletePageAdmin, deletePageAuthor } from "../API";
+import { getPage, getUsers, updatePageAdmin, updatePage, deletePageAdmin, deletePageAuthor, getImages } from "../API";
 import { useContext, useEffect, useState } from "react";
 import { Alert, Button, Col, Container, Form, Spinner } from "react-bootstrap";
 import UserContext from "../UserContext";
@@ -194,19 +194,19 @@ function EditPage(props) {
                     setDirty(true);
                   }}>
                   {!users.length && <option key={author} value={author}>{author}</option>}
-                  {users.length && users.map((u) => <option key={u} value={u}>{u}</option>)}
+                  {users.length && users.map((u, idx) => <option key={idx} value={u}>{u}</option>)}
                 </Form.Select>
               </Form.Group>
             </Col>
             
-            <Col xs="5">
+            <Col xs="2">
                 <Form.Group className="mb-4" controlId="formCreationDate">
                   <Form.Label>Creation date</Form.Label>
                   <Form.Control disabled type="date" required={true} defaultValue={page.creationDate}/>
                 </Form.Group>
             </Col>
 
-            <Col xs="5">
+            <Col xs="2">
                 <Form.Group className="mb-4" controlId="formPublicationDate">
                   <Form.Label>Publication date</Form.Label>
                   <Form.Control type="date" required={true} value={pubDate || ""}
@@ -220,7 +220,7 @@ function EditPage(props) {
 
             <Form.Group className="mb-4">
               <Form.Label>Content blocks</Form.Label><br/>
-              <EditBlocks blocks={blocks} updateBlocks={handleUpdateBlocks}/>
+              <EditBlocks blocks={blocks} updateBlocks={handleUpdateBlocks} images={props.images}/>
             </Form.Group>
 
             <Container className="form-buttons pt-3 pb-5">

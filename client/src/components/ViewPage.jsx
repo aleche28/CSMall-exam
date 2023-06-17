@@ -131,7 +131,7 @@ function Block(props) {
     <>
       {props.block.type === "header" && <h3>{props.block.content}</h3>}
       {props.block.type === "paragraph" && <p>{props.block.content}</p>}
-      {props.block.type === "image" && <img src={APIURL + "/static/images/" + props.block.content} alt={props.block.content}></img>}
+      {props.block.type === "image" && <img className="view-image" src={APIURL + "/static/images/" + props.block.content} alt={props.block.content}></img>}
     </>
   )
 }
