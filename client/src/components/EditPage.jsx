@@ -205,7 +205,7 @@ function EditPage(props) {
             <Col xs="5">
                 <Form.Group className="mb-4" controlId="formTitle">
                   <Form.Label>Title</Form.Label>
-                  <Form.Control type="text" required={true} value={title} 
+                  <Form.Control type="text" required={true} value={title}
                     onChange={(ev) => {
                       setTitle(ev.target.value);
                       setDirty(true);

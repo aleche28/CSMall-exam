@@ -108,6 +108,13 @@ function BlockRow(props) {
   const [content, setContent] = useState(props.block.content);
   const [index, setIndex] = useState(props.images.findIndex((i) => i === props.block.content));
 
+  // used to reset the image when the page is reset
+  useEffect(() => {
+    setContent(props.block.content);
+    if (props.block.type === "image")
+      setIndex(props.images.findIndex((i) => i === props.block.content));
+  }, [props.block]);
+
   const handleSelect = (selectedIndex) => {
     setIndex(selectedIndex);
     setContent(props.images[selectedIndex]);
@@ -142,7 +149,8 @@ function BlockRow(props) {
           {editing && props.block.type !== "image" && 
             <Form.Group className="mb-3" controlId="formContent">
               <Form.Label>Content</Form.Label>
-              <Form.Control as="textarea" rows={"auto"} 
+              <Form.Control as="textarea" rows={"auto"}
+                required
                 value={content} onChange={(ev) => setContent(ev.target.value)} />
             </Form.Group>}
 
@@ -182,6 +190,7 @@ function BlockRow(props) {
           {editing ? 
             <>
               <Button variant="success" className="mb-1"
+                disabled={props.block.type !== "image" && !content}
                 onClick={() => handleUpdate(props.block.position, content)}>
                 <i className="bi bi-check-lg"></i>
               </Button>
@@ -256,15 +265,15 @@ function NewBlockForm(props) {
               </Carousel>
             </Container>
           }
-
         </Col>
         
         <Col xs={1}>
           <Button variant="danger" onClick={() => props.closeForm()}>
             <i className="bi bi-trash3"></i>
           </Button>
-          <Button variant="success" onClick={() => {
-            type === "image" ?
+          <Button variant="success" disabled={type !== "image" && !content}
+            onClick={() => {
+              type === "image" ?
               props.addBlock(type, props.images[index]) :
               props.addBlock(type, content);
             }}>
