@@ -239,13 +239,13 @@ function EditPage(props) {
 
             <Form.Group className="mb-4">
               <Form.Label>Content blocks</Form.Label><br/>
-              <EditBlocks blocks={blocks} updateBlocks={handleUpdateBlocks} images={props.images}/>
+              <EditBlocks blocks={blocks} updateBlocks={handleUpdateBlocks} images={images}/>
             </Form.Group>
 
             <Container className="form-buttons pt-3 pb-5">
               <Button variant="warning" className="mx-3" size="lg" onClick={() => handleReset()}>Reset</Button>
               <Button variant="secondary" className="mx-3" size="lg" onClick={() => navigate(-1)}>Cancel</Button>
-              <Button variant="primary" className="mx-3" size="lg" onClick={() => handleSave()} disabled={!dirty}>Save</Button>
+              <Button variant="primary" className="mx-3" size="lg" onClick={() => handleSave()} disabled={!dirty || !title}>Save</Button>
             </Container>
             <Container className="form-buttons pb-5">
               <Button variant="danger" className="mx-3" size="lg" onClick={() => handleDelete()}>Delete page</Button>

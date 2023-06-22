@@ -56,7 +56,7 @@ function PublishedPageRow(props) {
       <Row className="page-row my-3 py-3 px-5 border rounded" onClick={() => navigate(`/pages/${page.id}`)}>
         <Col>
           <Row><h4>{page.title}</h4></Row>
-          <Row><small>by {page.author}</small></Row>
+          <Row><small>Author: {page.author}</small></Row>
         </Col>
         <Col>
           <Row>Published on:</Row>

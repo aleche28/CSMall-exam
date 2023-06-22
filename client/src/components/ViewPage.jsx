@@ -129,9 +129,12 @@ function Page(props) {
 function Block(props) {
   return (
     <>
-      {props.block.type === "header" && <h3>{props.block.content}</h3>}
-      {props.block.type === "paragraph" && <p>{props.block.content}</p>}
-      {props.block.type === "image" && <img className="view-image" src={APIURL + "/static/images/" + props.block.content} alt={props.block.content}></img>}
+      <Container className="mb-2">
+        {props.block.type === "header" && <h3>{props.block.content}</h3>}
+        {props.block.type === "paragraph" && <p>{props.block.content}</p>}
+        {props.block.type === "image" && <img className="view-image" src={APIURL + "/static/images/" + props.block.content} alt={props.block.content}></img>}
+        <br/>
+      </Container>
     </>
   )
 }
