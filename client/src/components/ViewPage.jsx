@@ -9,7 +9,6 @@ function ViewPage(props) {
   const [page, setPage] = useState(undefined);
 
   const [errMsg, setErrMsg] = useState("");
-  const [infoMsg, setInfoMsg] = useState("");
 
   const [loading, setLoading] = useState(true);
 
@@ -19,61 +18,40 @@ function ViewPage(props) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  async function fetchPage() {
-    try {
-      setLoading(true);
-
-      let fetchedPage;
-      if (location.pathname === `/pages/${pageId}`) {
-        fetchedPage = await getPublishedPage(Number(pageId));
-      } else {
-        if (!user) {
-          navigate("/login");
-          return;
-        }
-        fetchedPage = await getPage(Number(pageId));
-      }
-
-      setPage(fetchedPage);
-      setErrMsg("");
-    } catch (err) {
-      setPage(undefined);
-      setErrMsg(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    async function fetchPage() {
+      try {
+        setLoading(true);
+  
+        let fetchedPage;
+        if (location.pathname === `/pages/${pageId}`) {
+          fetchedPage = await getPublishedPage(Number(pageId));
+        } else {
+          if (!user) {
+            navigate("/login");
+            return;
+          }
+          fetchedPage = await getPage(Number(pageId));
+        }
+  
+        setPage(fetchedPage);
+        setErrMsg("");
+      } catch (err) {
+        setPage(undefined);
+        setErrMsg(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchPage();    
   }, [user, pageId]);
-
-  async function handlePublish() {
-    try {
-      setLoading(true);
-
-      const publishedPage = { ...page, publicationDate: dayjs().format("YYYY-MM-DD") };
-      user.role === "Admin" ?
-        await updatePageAdmin(pageId, publishedPage) :
-        await updatePage(page.author, pageId, publishedPage);
-      
-      fetchPage();
-      setInfoMsg("Page has been published.");
-    } catch(err) {
-      // the error caught here is from the updatePage, because the errors in fetchPage are already handled inside it
-      setErrMsg(err.message + " Page hasn't been published.");
-      setLoading(false);
-    }
-  }
 
   return (
     // prettier-ignore
     <>
       {!loading && errMsg &&
         <Alert key={"danger"} variant="danger" onClose={() => setErrMsg("")} dismissible> {errMsg} </Alert>}
-
-      {!loading && infoMsg &&
-        <Alert key={"success"} variant="success" onClose={() => setInfoMsg("")} dismissible> {infoMsg} </Alert>}
 
       {loading && 
         <Container className="d-flex my-5 justify-content-center">
@@ -92,14 +70,6 @@ function ViewPage(props) {
             <i className="bi bi-pencil-fill"></i>
           </Link>
       }
-
-      { // show the "publish now" button if the user is authenticated and is the author of the page
-        !loading && user && page &&
-          (!page.publicationDate || page.publicationDate > dayjs().format("YYYY-MM-DD")) &&
-          <Button disabled={user.username !== page.author} variant="primary" size="lg" className="fixed-left-bottom" onClick={() => handlePublish()}>
-            Publish now
-          </Button>
-        }
     </>
   );
 }

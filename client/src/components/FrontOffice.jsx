@@ -2,6 +2,7 @@ import { Col, Row, Container, Alert, Spinner } from "react-bootstrap";
 import { getPublished } from "../API";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
 
 function FrontOffice(props) {
   const [pages, setPages] = useState([]);
@@ -26,7 +27,7 @@ function FrontOffice(props) {
 
   return (
     <>
-      <Container fluid className="col-sm-8">
+      <Container fluid className="col-md-10">
         {loading &&
           <Container className="d-flex my-5 justify-content-center">
             <Spinner animation="border" role="status">
@@ -54,13 +55,23 @@ function PublishedPageRow(props) {
   return (
     <>
       <Row className="page-row my-3 py-3 px-5 border rounded" onClick={() => navigate(`/pages/${page.id}`)}>
-        <Col>
+        <Col xs={6}>
           <Row><h4>{page.title}</h4></Row>
           <Row><small>Author: {page.author}</small></Row>
         </Col>
-        <Col>
-          <Row>Published on:</Row>
-          <Row>{page.publicationDate}</Row>
+        <Col  className="page-row-date">
+          <Row>Created on:</Row>
+          <Row>{page.creationDate}</Row>
+        </Col>
+        <Col className="page-row-date">
+        {!page.publicationDate && <Row>Draft</Row>}
+        {page.publicationDate && (page.publicationDate <= dayjs().format("YYYY-MM-DD") ?
+          <><Row>Published on:</Row>
+          <Row>{page.publicationDate}</Row></>
+          :
+          <><Row>Scheduled for:</Row>
+          <Row>{page.publicationDate}</Row></>)
+        }
         </Col>
       </Row>
     </>

@@ -11,15 +11,15 @@ function AddPage(props) {
 
   const [images, setImages] = useState([]);
 
-  // store error/info messages to show them in an alert
   const [errMsg, setErrMsg] = useState("");
   const [infoMsg, setInfoMsg] = useState("");
 
-  // store values of the input forms
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [pubDate, setPubDate] = useState("");
   const [blocks, setBlocks] = useState([]);
+
+  const [validated, setValidated] = useState(false);
 
   const navigate = useNavigate();
 
@@ -29,9 +29,6 @@ function AddPage(props) {
       navigate("/login");
   }, [user]);
 
-  // fetch images that can be used in the blocks:
-  // images are fetched here at higher level to reduce the number of calls to the API, 
-  // because we assume that the list of images doesn't change
   useEffect(() => {
     async function fetchImages() {
       try {
@@ -54,7 +51,12 @@ function AddPage(props) {
   }
 
   // save the new created page into the db
-  async function handleSave() {
+  async function handleSave(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const isValid = form.checkValidity();
+    setValidated(true);
+
     if (
       !blocks.some((b) => b.type === "header") ||
       !blocks.some((b) => b.type !== "header")
@@ -62,6 +64,8 @@ function AddPage(props) {
       setErrMsg("There must be at least one header block and an image/paragraph block.");
       return;
     }
+
+    if (!isValid) return;
     
     const newPage = {
       title: title,
@@ -74,8 +78,8 @@ function AddPage(props) {
     try {
       const page = await createPage(newPage);
       setInfoMsg("Page saved successfully.");
-      //setTimeout(() => navigate(`/back-office/pages/${page.id}`), 500);
-      navigate(`/back-office/pages/${page.id}`);
+      setTimeout(() => navigate(`/back-office/pages/${page.id}`), 500);
+      //navigate(`/back-office/pages/${page.id}`);
     } catch (err) {
       setErrMsg(err.message);
     }
@@ -89,21 +93,19 @@ function AddPage(props) {
   return (
     // prettier-ignore
     <>
-      { // show error alert if there are errors
-        errMsg && <Alert key={"danger"} variant="danger" onClose={() => setErrMsg("")} dismissible> {errMsg} </Alert>
-      }
+      {errMsg && <Alert key={"danger"} variant="danger" onClose={() => setErrMsg("")} dismissible> {errMsg} </Alert>}
       
       {infoMsg && <Alert key={"success"} variant="success" onClose={() => setInfoMsg("")} dismissible> {infoMsg} </Alert>}
 
       {user &&
         <>
-          <Form>
-            
+          <Form noValidate validated={validated} onSubmit={handleSave}>
             <Col xs="5">
                 <Form.Group className="mb-4" controlId="formTitle">
                   <Form.Label>Title</Form.Label>
-                  <Form.Control type="text" required={true} value={title} 
+                  <Form.Control type="text" required value={title} 
                     onChange={(ev) => setTitle(ev.target.value)}/>
+                  <Form.Control.Feedback type="invalid">Please provide a title.</Form.Control.Feedback>
                 </Form.Group>
             </Col>
             
@@ -128,12 +130,10 @@ function AddPage(props) {
               <EditBlocks blocks={blocks} updateBlocks={handleUpdateBlocks} images={images}/>
             </Form.Group>
 
-            <Container className=" pt-3 pb-5">
+            <Container className="pt-3 pb-5">
               <Button variant="danger" className="mx-3" size="lg" onClick={() => handleReset()}>Reset</Button>
               <Button variant="secondary" className="mx-3" size="lg" onClick={() => navigate("/back-office")}>Cancel</Button>
-              <Button variant="primary" className="mx-3" size="lg" 
-                disabled={!title}
-                onClick={() => handleSave()}>Save</Button>
+              <Button type="submit" variant="primary" className="mx-3" size="lg">Save</Button>
             </Container>
           </Form>
         </>

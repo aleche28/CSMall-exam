@@ -1,7 +1,5 @@
 const APIURL = "http://localhost:3000/api";
 
-/******  AUTH  ******/
-
 async function login(username, password) {
   try {
     const response = await fetch(APIURL + "/login", {
@@ -78,8 +76,6 @@ async function logout() {
     throw new Error(err);
   }
 }
-
-/******  PAGES  ******/
 
 async function getPublished() {
   try {

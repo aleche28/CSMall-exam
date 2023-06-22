@@ -41,6 +41,8 @@ function EditPage(props) {
    */ 
   const [dirtyBlocks, setDirtyBlocks] = useState(false);
 
+  const [validated, setValidated] = useState(false);
+
   const { pageId } = useParams();
   const navigate = useNavigate();
 
@@ -123,7 +125,12 @@ function EditPage(props) {
   }
 
   // 
-  async function handleSave() {
+  async function handleSave(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const isValid = form.checkValidity();
+    setValidated(true);
+
     if (
       !blocks.some((b) => b.type === "header") ||
       !blocks.some((b) => b.type !== "header")
@@ -131,6 +138,8 @@ function EditPage(props) {
       setErrMsg("There must be at least one header block and an image/paragraph block.");
       return;
     }
+
+    if (!isValid) return;
 
     const newPage = {
       title: title,
@@ -191,7 +200,7 @@ function EditPage(props) {
 
       {!loading && page && user &&
         <>
-          <Form>
+          <Form noValidate validated={validated} onSubmit={handleSave}>
             
             <Col xs="5">
                 <Form.Group className="mb-4" controlId="formTitle">
@@ -201,6 +210,7 @@ function EditPage(props) {
                       setTitle(ev.target.value);
                       setDirty(true);
                     }}/>
+                  <Form.Control.Feedback type="invalid">Please provide a title.</Form.Control.Feedback>
                 </Form.Group>
             </Col>
 
@@ -229,7 +239,7 @@ function EditPage(props) {
                 <Form.Group className="mb-4" controlId="formPublicationDate">
                   <Form.Label>Publication date</Form.Label>
                   <Form.Control type="date" required={true} value={pubDate || ""}
-                    min={dayjs().format("YYYY-MM-DD")}
+                    min={dayjs(page.creationDate).format("YYYY-MM-DD")}
                     onChange={(ev) => {
                       setPubDate(ev.target.value);
                       setDirty(true);
@@ -245,7 +255,8 @@ function EditPage(props) {
             <Container className="form-buttons pt-3 pb-5">
               <Button variant="warning" className="mx-3" size="lg" onClick={() => handleReset()}>Reset</Button>
               <Button variant="secondary" className="mx-3" size="lg" onClick={() => navigate(-1)}>Cancel</Button>
-              <Button variant="primary" className="mx-3" size="lg" onClick={() => handleSave()} disabled={!dirty || !title}>Save</Button>
+              <Button type="submit" variant="primary" className="mx-3" size="lg"
+                disabled={!dirty}>Save</Button>
             </Container>
             <Container className="form-buttons pb-5">
               <Button variant="danger" className="mx-3" size="lg" onClick={() => handleDelete()}>Delete page</Button>

@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 import { Container, Navbar, Nav } from "react-bootstrap";
-import { getImages, login, logout } from "./API";
+import { login, logout } from "./API";
 import { FrontOffice } from "./components/FrontOffice";
 import {
   BrowserRouter,
