@@ -23,28 +23,6 @@ async function login(username, password) {
   }
 }
 
-async function register(username, email, password) {
-  try {
-    const response = await fetch(APIURL + "/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      //credentials: "include", // this parameter specifies that authentication cookie must be forwared
-      body: JSON.stringify({ username, email, password }),
-    });
-    if (response.ok) {
-      return true;
-    } else {
-      const res = await response.json();
-      const message = res.error;
-      throw new Error(message);
-    }
-  } catch (err) {
-    throw new Error(err);
-  }
-}
-
 async function getLoggedUser() {
   try {
     const response = await fetch(APIURL + "/sessions/current", {
@@ -141,7 +119,7 @@ async function getPage(pageId) {
   }
 }
 
-async function getUsers(pageId) {
+async function getUsers() {
   try {
     const response = await fetch(APIURL + `/users`, { credentials: "include" });
 
@@ -280,7 +258,7 @@ async function getImages() {
   }
 }
 
-export { login, register, logout, getPublished, getAll, 
+export { login, logout, getPublished, getAll, 
           getPublishedPage, getPage, getUsers, updatePageAdmin,
           updatePage, createPage, deletePageAdmin, deletePageAuthor, getImages,
           APIURL };

@@ -15,7 +15,6 @@ import UserContext from "./UserContext";
 import "bootstrap/dist/css/bootstrap.min.css";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
-import { RegisterForm } from "./components/RegisterForm";
 import { ViewPage } from "./components/ViewPage";
 import { BackOffice } from "./components/BackOffice";
 import { EditPage } from "./components/EditPage";
@@ -48,7 +47,6 @@ function App() {
               <Route path="back-office/edit/:pageId" element={<EditPage />} />
               <Route path="back-office/add" element={<AddPage />} />
               <Route path="login" element={<LoginForm checkLogin={checkLogin} />} />
-              <Route path="register" element={<RegisterForm/>} />
               <Route path="*" element={/*<PageNotFound />*/ <h1>Page not found</h1>} />
             </Route>
           </Routes>

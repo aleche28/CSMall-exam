@@ -16,7 +16,6 @@ const toPageObject = (row) => {
     creationDate: dayjs(row.creation_date).format(dateFormat),
     publicationDate:
       row.publication_date && dayjs(row.publication_date).format(dateFormat),
-    blocks: [],
   };
 };
 
@@ -40,6 +39,7 @@ const aggregateRows = (rows) => {
       currPageId = row.id;
       if (page) pages.push(page);
       page = toPageObject(row);
+      page.blocks = [];
     }
     if (row.blockId) {
       block = toBlockObject(row);
@@ -53,15 +53,11 @@ const aggregateRows = (rows) => {
 exports.getAllPages = () => {
   return new Promise((resolve, reject) => {
     const sql =
-      "SELECT p.id, title, author, creation_date, publication_date,\
-      b.id as blockId, type, position, content\
-      FROM pages p LEFT JOIN blocks b\
-      ON b.page = p.id\
-      ORDER BY p.id";
+      "SELECT * FROM pages";
     db.all(sql, (err, rows) => {
       if (err) reject(err);
 
-      const pages = aggregateRows(rows);
+      const pages = rows.map((r) => toPageObject(r));
       resolve(pages);
     });
   });
@@ -71,16 +67,11 @@ exports.getAllPublishedPages = () => {
   return new Promise((resolve, reject) => {
     const today = dayjs().format(dateFormat);
     const sql =
-      "SELECT p.id, title, author, creation_date, publication_date,\
-      b.id as blockId, type, position, content\
-      FROM pages p LEFT JOIN blocks b\
-      ON b.page = p.id\
-      WHERE publication_date <= ?\
-      ORDER BY p.id";
+      "SELECT * FROM pages WHERE publication_date <= ?";
     db.all(sql, [today], (err, rows) => {
       if (err) reject(err);
 
-      const pages = aggregateRows(rows);
+      const pages = rows.map((r) => toPageObject(r));
       resolve(pages);
     });
   });
@@ -91,16 +82,11 @@ exports.getAllPublishedPages = () => {
 exports.getAllPagesByAuthor = (authorId) => {
   return new Promise((resolve, reject) => {
     const sql =
-      "SELECT p.id, title, author, creation_date, publication_date,\
-      b.id as blockId, type, position, content\
-      FROM pages p LEFT JOIN blocks b\
-      ON b.page = p.id\
-      WHERE author = ?\
-      ORDER BY p.id";
+      "SELECT * FROM pages WHERE author = ?";
     db.all(sql, [authorId], (err, rows) => {
       if (err) reject(err);
 
-      const pages = aggregateRows(rows);
+      const pages = rows.map((r) => toPageObject(r));
       resolve(pages);
     });
   });

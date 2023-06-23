@@ -3,13 +3,24 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
+const { check, validationResult } = require("express-validator");
 const authController = require("../controllers/auth.controller");
 const usersDAO = require("../dao/users.dao");
 
+// This function is used to format express-validator errors as strings
+const errorFormatter = ({ location, msg, param, value, nestedErrors }) => {
+  return `${location}[${param}]: ${msg}`;
+};
+
 router.post(
   "/login",
-  // TO-DO: validate email and password
+  check("username").isLength({ min: 1 }),
+  check("password").isLength({ min: 1 }),
   function (req, res, next) {
+    const errors = validationResult(req).formatWith(errorFormatter);
+    if (!errors.isEmpty())
+      return res.status(422).json({ error: errors.array().join(", ") });
+      
     passport.authenticate("local", function (err, user, info, status) {
       if (err) {
         return next(err);
@@ -25,12 +36,6 @@ router.post(
     })(req, res, next);
   },
   authController.login
-);
-
-router.post(
-  "/register",
-  // TO-DO: validate username, email and password
-  authController.register
 );
 
 router.post("/logout", authController.logout);
@@ -51,18 +56,20 @@ router.post("/checklogin", (req, res) => {
 });
 
 /* get list of all users (only usernames) from the db */
-router.get("/users", (req, res, next) => {
-  if (req.isAuthenticated() && req.user.role === "Admin") next();
-  else res.status(401).json({ message: "Not authorized" });
-},
-async (req, res) => {
-  try {
-    const users = await usersDAO.getAllUsers();
-    res.json(users);
-  } catch(err) {
-    res.status(500).json({ error: err.message });
+router.get(
+  "/users",
+  (req, res, next) => {
+    if (req.isAuthenticated() && req.user.role === "Admin") next();
+    else res.status(401).json({ message: "Not authorized" });
+  },
+  async (req, res) => {
+    try {
+      const users = await usersDAO.getAllUsers();
+      res.json(users);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
   }
-}
 );
 
 module.exports = router;

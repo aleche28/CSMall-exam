@@ -1,8 +1,42 @@
 "use strict";
 
 const express = require("express");
+const { check, validationResult } = require("express-validator");
 const pagesController = require("../controllers/pages.controller");
 const router = express.Router();
+
+// This function is used to format express-validator errors as strings
+const errorFormatter = ({ location, msg, param, value, nestedErrors }) => {
+  return `${location}[${param}]: ${msg}`;
+};
+
+const validate = (req, res, next) => {
+  const errors = validationResult(req).formatWith(errorFormatter);
+  if (!errors.isEmpty())
+    return res.status(422).json({ error: errors.array().join(", ") });
+  next();
+};
+
+const customBlocksValidator = (value) => {
+  for (const block of value) {
+    if (
+      !block.hasOwnProperty("type") ||
+      !block.hasOwnProperty("content") ||
+      !block.hasOwnProperty("position")
+    )
+      throw new Error("Missing field in one of the blocks");
+    if (
+      block.type !== "header" &&
+      block.type !== "paragraph" &&
+      block.type !== "image"
+    )
+      throw new Error("Block type is not a valid type");
+    if (!(typeof block.content === "string") || !block.content.length)
+      throw new Error("Invalid block content");
+    if (!Number.isInteger(block.position) || block.position < 1)
+      throw new Error("Invalid block position");
+  }
+};
 
 /* check authentication middleware */
 const isLoggedIn = (req, res, next) => {
@@ -28,6 +62,18 @@ const isAdmin = (req, res, next) => {
   return res.status(401).json({ error: "Not authorized: must be an admin" });
 };
 
+const arePageBlocksValid = (req, res, next) => {
+  const valid =
+    req.body.blocks.some((b) => b.type === "header") &&
+    req.body.blocks.some((b) => b.type !== "header");
+
+  if (valid) return next();
+  return res.status(400).json({
+    error:
+      "List of page blocks must contain at least one header and one paragraph/image block",
+  });
+};
+
 /*************************
  *  Front-office routes  *
  *************************/
@@ -44,7 +90,12 @@ router.get("/pages/published", pagesController.getAllPublishedPages);
  *
  * Get a specific published page
  */
-router.get("/pages/published/:pageId", pagesController.getPublishedPageById);
+router.get(
+  "/pages/published/:pageId",
+  check("pageId").isInt({ min: 1 }),
+  validate,
+  pagesController.getPublishedPageById
+);
 
 /************************
  *  Back-office routes  *
@@ -66,7 +117,12 @@ router.get("/pages", pagesController.getAllPages);
  * Get a specific page
  * Requires: authentication
  */
-router.get("/pages/:pageId", pagesController.getPage);
+router.get(
+  "/pages/:pageId",
+  check("pageId").isInt({ min: 1 }),
+  validate,
+  pagesController.getPage
+);
 
 /**
  * GET /api/authors/:authorId/pages
@@ -89,7 +145,21 @@ router.get(
  * Create a new page.
  * Fields of the page are passed inside request body object
  */
-router.post("/pages", pagesController.createPage);
+router.post(
+  "/pages",
+  check("title").isLength({ min: 1 }),
+  check("creationDate")
+    .isLength({ min: 10, max: 10 })
+    .isISO8601({ strict: true }),
+  check("publicationDate")
+    .optional({ values: "falsy" })
+    .isLength({ min: 10, max: 10 })
+    .isISO8601({ strict: true }),
+  check("blocks").optional().isArray({ min: 2 }).custom(customBlocksValidator),
+  validate,
+  arePageBlocksValid,
+  pagesController.createPage
+);
 
 /**
  * PUT /api/authors/:authorId/pages/:pageId
@@ -102,6 +172,19 @@ router.post("/pages", pagesController.createPage);
 router.put(
   "/authors/:authorId/pages/:pageId",
   isAuthor,
+  check("pageId").isInt({ min: 1 }),
+  check("title").isLength({ min: 1 }),
+  check("author").isLength({ min: 1 }),
+  check("creationDate")
+    .isLength({ min: 10, max: 10 })
+    .isISO8601({ strict: true }),
+  check("publicationDate")
+    .optional({ values: "falsy" })
+    .isLength({ min: 10, max: 10 })
+    .isISO8601({ strict: true }),
+  check("blocks").optional().isArray({ min: 2 }).custom(customBlocksValidator),
+  validate,
+  arePageBlocksValid,
   (req, res, next) => {
     if (req.body.author && req.body.author !== req.params.authorId)
       return res.status(401).json({
@@ -124,6 +207,8 @@ router.put(
 router.delete(
   "/authors/:authorId/pages/:pageId",
   isAuthor,
+  check("pageId").isInt({ min: 1 }),
+  validate,
   pagesController.deletePage
 );
 
@@ -135,13 +220,36 @@ router.delete(
  * Edit an existing page.
  * Fields of the page are passed inside request body object
  */
-router.put("/pages/:pageId", isAdmin, pagesController.updatePage);
+router.put(
+  "/pages/:pageId",
+  isAdmin,
+  check("pageId").isInt({ min: 1 }),
+  check("title").isLength({ min: 1 }),
+  check("author").isLength({ min: 1 }),
+  check("creationDate")
+    .isLength({ min: 10, max: 10 })
+    .isISO8601({ strict: true }),
+  check("publicationDate")
+    .isLength({ min: 10, max: 10 })
+    .isISO8601({ strict: true })
+    .optional({ values: "falsy" }),
+  check("blocks").optional().isArray({ min: 2 }).custom(customBlocksValidator),
+  validate,
+  arePageBlocksValid,
+  pagesController.updatePage
+);
 
 /**
  * DELETE /api/pages/:pageId
  *
  * Delete a page (and its blocks).
  */
-router.delete("/pages/:pageId", isAdmin, pagesController.deletePage);
+router.delete(
+  "/pages/:pageId",
+  isAdmin,
+  check("pageId").isInt({ min: 1 }),
+  validate,
+  pagesController.deletePage
+);
 
 module.exports = router;

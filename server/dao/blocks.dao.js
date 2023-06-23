@@ -28,21 +28,6 @@ exports.createBlock = (newBlock) => {
   });
 };
 
-exports.getBlockById = (blockId) => {
-  return new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM blocks WHERE id = ?";
-    db.get(sql, [blockId], (err, row) => {
-      if (err) reject(err);
-
-      if (!row) {
-        resolve({ error: "Block not found" });
-      }
-
-      resolve(toBlockObject(row));
-    });
-  });
-};
-
 exports.getBlocksByPageId = (pageId) => {
   return new Promise((resolve, reject) => {
     const sql = "SELECT * FROM blocks WHERE id = ?";
@@ -51,36 +36,6 @@ exports.getBlocksByPageId = (pageId) => {
 
       const blocks = rows.map((r) => toBlockObject(r));
       resolve(blocks);
-    });
-  });
-};
-
-exports.updateBlockById = (blockId, block) => {
-  return new Promise((resolve, reject) => {
-    const sql = "UPDATE blocks SET type=?, content=?, position=? WHERE id = ?";
-    db.run(
-      sql,
-      [block.type, block.content, block.position, blockId],
-      function (err) {
-        if (err) {
-          reject(err);
-        }
-        if (this.changes !== 1) resolve({ error: "Block not found" });
-        else resolve(exports.getBlockById(blockId));
-      }
-    );
-  });
-};
-
-exports.deleteBlockById = (blockId) => {
-  return new Promise((resolve, reject) => {
-    const sql = "DELETE FROM blocks WHERE id = ?";
-    db.run(sql, [blockId], function (err) {
-      if (err) {
-        reject(err);
-      }
-      if (this.changes !== 1) resolve({ error: "Block not found" });
-      else resolve({ message: "Block deleted" });
     });
   });
 };
