@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 import { Container, Navbar, Nav } from "react-bootstrap";
-import { login, logout } from "./API";
+import { getWebsiteName, login, logout } from "./API";
 import { FrontOffice } from "./components/FrontOffice";
 import {
   BrowserRouter,
@@ -19,9 +19,23 @@ import { ViewPage } from "./components/ViewPage";
 import { BackOffice } from "./components/BackOffice";
 import { EditPage } from "./components/EditPage";
 import { AddPage } from "./components/AddPage";
+import { AdminDashboard } from "./components/AdminDashboard";
 
 function App() {
   const [user, setUser] = useState(undefined);
+  const [websiteName, setWebsiteName] = useState("");
+
+  useEffect(() => {
+    async function fetchWebsiteName() {
+      try {
+        const name = await getWebsiteName();
+        setWebsiteName(name);
+      } catch (err) {
+        setWebsiteName("");
+      }
+    }
+    fetchWebsiteName();
+  }, []);
 
   const checkLogin = async (username, password) => {
     const res = await login(username, password);
@@ -39,13 +53,14 @@ function App() {
       <UserContext.Provider value={user}>
         <BrowserRouter>
           <Routes>
-            <Route element={<MainLayout handleLogout={handleLogout} />}>
+            <Route element={<MainLayout handleLogout={handleLogout} websiteName={websiteName}/>}>
               <Route index element={<FrontOffice />} />
               <Route path="pages/:pageId" element={<ViewPage />} />
               <Route path="back-office" element={<BackOffice />} />
               <Route path="back-office/pages/:pageId" element={<ViewPage />} />
               <Route path="back-office/edit/:pageId" element={<EditPage />} />
               <Route path="back-office/add" element={<AddPage />} />
+              <Route path="admin/dashboard" element={<AdminDashboard updateWebsiteName={(newName) => setWebsiteName(newName)}/>} />
               <Route path="login" element={<LoginForm checkLogin={checkLogin} />} />
               <Route path="*" element={/*<PageNotFound />*/ <h1>Page not found</h1>} />
             </Route>
@@ -66,7 +81,7 @@ function MainLayout(props) {
           <Container>
             <Navbar.Brand>
               <Link to="/" style={{ color: "white", textDecoration: "none" }}>
-                CMSmall
+                {props.websiteName}
               </Link>
             </Navbar.Brand>
             <Navbar.Toggle aria-controls="navbar" />
@@ -74,6 +89,8 @@ function MainLayout(props) {
                 <Nav className="me-auto">
                   <Nav.Link as={Link} to={"/"}>Home</Nav.Link>
                   <Nav.Link as={Link} to={"/back-office"}>Back-Office</Nav.Link>
+                  {user && user.role === "Admin" &&
+                    <Nav.Link as={Link} to={"/admin/dashboard"}>Admin dashboard</Nav.Link>}
                 </Nav>
                 <Navbar.Text className="m-0 p-0">
                 {user ? (

@@ -89,7 +89,9 @@ async function getAll() {
 
 async function getPublishedPage(pageId) {
   try {
-    const response = await fetch(APIURL + `/pages/published/${pageId}`, { credentials: "include" });
+    const response = await fetch(APIURL + `/pages/published/${pageId}`, {
+      credentials: "include",
+    });
 
     if (response.ok) {
       const page = await response.json();
@@ -105,7 +107,9 @@ async function getPublishedPage(pageId) {
 
 async function getPage(pageId) {
   try {
-    const response = await fetch(APIURL + `/pages/${pageId}`, { credentials: "include" });
+    const response = await fetch(APIURL + `/pages/${pageId}`, {
+      credentials: "include",
+    });
 
     if (response.ok) {
       const page = await response.json();
@@ -160,14 +164,17 @@ async function updatePageAdmin(pageId, newPage) {
 
 async function updatePage(authorId, pageId, newPage) {
   try {
-    const response = await fetch(APIURL + `/author/${authorId}/pages/${pageId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(newPage),
-    });
+    const response = await fetch(
+      APIURL + `/author/${authorId}/pages/${pageId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(newPage),
+      }
+    );
 
     if (response.ok) {
       const updatedPage = await response.json();
@@ -225,10 +232,13 @@ async function deletePageAdmin(pageId) {
 
 async function deletePageAuthor(pageId, authorId) {
   try {
-    const response = await fetch(APIURL + `/authors/${authorId}/pages/${pageId}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
+    const response = await fetch(
+      APIURL + `/authors/${authorId}/pages/${pageId}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+      }
+    );
 
     if (response.ok) {
       const result = await response.json();
@@ -258,7 +268,62 @@ async function getImages() {
   }
 }
 
-export { login, logout, getPublished, getAll, 
-          getPublishedPage, getPage, getUsers, updatePageAdmin,
-          updatePage, createPage, deletePageAdmin, deletePageAuthor, getImages,
-          APIURL };
+async function getWebsiteName() {
+  try {
+    const response = await fetch(APIURL + "/configs/websitename", {
+      credentials: "include",
+    });
+
+    if (response.ok) {
+      const res = await response.json();
+      return res.websiteName;
+    } else {
+      const res = await response.json();
+      throw new Error(res.error);
+    }
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+async function updateWebsiteName(newWebsiteName) {
+  try {
+    const response = await fetch(APIURL + "/configs/websitename", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ websiteName: newWebsiteName }),
+    });
+
+    if (response.ok) {
+      const { websiteName } = await response.json();
+      return websiteName;
+    } else {
+      const res = await response.json();
+      throw new Error(res.error);
+    }
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+export {
+  login,
+  logout,
+  getPublished,
+  getAll,
+  getPublishedPage,
+  getPage,
+  getUsers,
+  updatePageAdmin,
+  updatePage,
+  createPage,
+  deletePageAdmin,
+  deletePageAuthor,
+  getImages,
+  getWebsiteName,
+  updateWebsiteName,
+  APIURL,
+};

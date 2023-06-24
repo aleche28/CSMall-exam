@@ -8,6 +8,7 @@ const passport = require("passport");
 const passportConfig = require("./config/passport.config");
 const authRouter = require('./routes/auth.router');
 const pagesRouter = require('./routes/pages.router');
+const configsRouter = require('./routes/configs.router');
 
 const app = express();
 app.use(morgan("dev"));
@@ -46,6 +47,7 @@ app.get("/api/images", (req, res) => {
 /* routes */
 app.use('/api', authRouter);
 app.use('/api', pagesRouter);
+app.use('/api', configsRouter);
 
 const PORT = 3000;
 
