@@ -24,6 +24,7 @@
         }
       }
     ```
+  - errors: `422` if missing body field, `401` if login failed
 
 - GET `/api/pages/published`
   - Retrieve the list of all published pages
@@ -40,6 +41,7 @@
         ...
       ]
     ```
+  - errors: `500` Internal server error
 
 - GET `/api/pages/published/:pageId`
   - Retrieve a published page by its id
@@ -65,6 +67,7 @@
       },
       ...
     ```
+  - errors: `422` if invalid pageId, `404` if page not found, `400` if page not published, `500` Internal server error
 
 - GET `/api/pages`
   - Retrieve the list of all created pages
@@ -81,6 +84,7 @@
         ...
       ]
     ```
+  - errors: `401` if not authenticated, `500` Internal server error
 
 - GET `/api/pages/:pageId`
   - Retrieve any page by its id
@@ -106,6 +110,7 @@
       },
       ...
     ```
+  - errors: `422` if invalid pageId, `401` if not authenticated, `404` if page not found, `500` Internal server error
 
 - POST `/api/pages`
   - Create a new page
@@ -138,6 +143,7 @@
         "blocks": [ ... ]
       }
     ```
+  - errors: `422` if invalid body fields, `401` if not authenticated, `500` Internal server error
 
 - PUT `/api/authors/:authorId/pages/:pageId`
   - Update an existing page for which the user is the author
@@ -162,6 +168,8 @@
         "blocks": [ ... ]
       }
     ```
+  - errors: `422` if invalid params or body, `401` if user is not author of the page, `404` if page not found, `500` Internal server error
+
 
 - DELETE `/api/authors/:authorId/pages/:pageId`
   - Delete an existing page for which the user is the author
@@ -175,6 +183,7 @@
         "blocksDeleted": 2
       }
     ```
+  - errors: `422` if invalid params or body, `401` if user is not author of the page, `404` if page not found, `500` Internal server error
 
 - PUT `/api/pages/:pageId`
   - Update an existing page changing also the author (admin only)
@@ -199,6 +208,7 @@
         "blocks": [ ... ]
       }
     ```
+  - errors: `422` if invalid pageId, `401` if not admin, `404` if page not found, `500` Internal server error
 
 - DELETE `/api/pages/:pageId`
   - Delete an existing page (admin only)
@@ -211,6 +221,7 @@
         "blocksDeleted": 2
       }
     ```
+  - errors: `422` if invalid pageId, `401` if not admin, `404` if page not found, `500` Internal server error
 
 - GET `/api/configs/websitename`
   - Retrieve the current name of the website
@@ -218,6 +229,7 @@
     ``` JSON
       { "websiteName": "CMSmall" }
     ```
+  - errors: `500` Internal server error
 
 - PUT `/api/configs/websitename`
   - Change the name of the website (admin only)
@@ -229,6 +241,8 @@
     ``` JSON
       { "websiteName": "CMSmall" }
     ```
+  - errors: `422` if invalid body field, `401` if not admin, `500` Internal server error
+
 
 - GET `/api/images`
   - Retrieve the list of images stored in the server
@@ -276,13 +290,17 @@
 
 ## Example Screenshot
 
-Add page screen:
-
-![Screenshot](./screenshots/add_page.png)
-
 List of all pages (back-office):
 
 ![Screenshot](./screenshots/back-office.png)
+
+View of a single page (back-office):
+
+![Screenshot](./screenshots/view_page.png)
+
+Add page screen:
+
+![Screenshot](./screenshots/add_page.png)
 
 ## Users Credentials
 | username | password |
