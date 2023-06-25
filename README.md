@@ -230,6 +230,17 @@
       { "websiteName": "CMSmall" }
     ```
 
+- GET `/api/images`
+  - Retrieve the list of images stored in the server
+  - response body: array of file names
+    ``` JSON
+      [
+        "cat.jpg",
+        "dog.jpg",
+        ...
+      ]
+    ```
+
 ## Database Tables
 
 - Table `users` - contains all the information about the users (id, username, email, salt, hash, role)

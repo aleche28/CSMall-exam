@@ -9,6 +9,7 @@ const passportConfig = require("./config/passport.config");
 const authRouter = require('./routes/auth.router');
 const pagesRouter = require('./routes/pages.router');
 const configsRouter = require('./routes/configs.router');
+const imageList = require("./images.json");
 
 const app = express();
 app.use(morgan("dev"));
@@ -38,10 +39,7 @@ app.use(passport.authenticate('session'));
 app.use("/api/static", express.static("public"));
 
 app.get("/api/images", (req, res) => {
-  // the list of images is hardcoded. A real solution would be to use "fs" or some other
-  // module to interact with the server file system
-  const images = ["cat.jpg", "dog.jpg", "milan.jpg", "polito.jpeg", "rome.jpg", "turin.jpg",];
-  res.json(images);
+  res.json(imageList);
 });
 
 /* routes */
