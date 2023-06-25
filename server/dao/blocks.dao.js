@@ -28,6 +28,21 @@ exports.createBlock = (newBlock) => {
   });
 };
 
+exports.getBlockById = (blockId) => {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT * FROM blocks WHERE id = ?";
+    db.get(sql, [blockId], (err, row) => {
+      if (err) reject(err);
+
+      if (!row) {
+        resolve({ error: "Block not found" });
+      }
+
+      resolve(toBlockObject(row));
+    });
+  });
+};
+
 exports.getBlocksByPageId = (pageId) => {
   return new Promise((resolve, reject) => {
     const sql = "SELECT * FROM blocks WHERE id = ?";

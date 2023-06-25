@@ -9,7 +9,7 @@ const isAdmin = (req, res, next) => {
   return res.status(401).json({ error: "Not authorized: must be an admin" });
 };
 
-router.get("/configs/websitename", isAdmin, async (req, res) => {
+router.get("/configs/websitename", async (req, res) => {
   try {
     const prop = await configsDAO.getWebsiteName();
 

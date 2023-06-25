@@ -34,3 +34,16 @@ GET http://localhost:3000/api/sessions/current HTTP/1.1
 ## Get the list of all users
 GET http://localhost:3000/api/users HTTP/1.1
 ###
+
+## Get the current name of the website
+GET http://localhost:3000/api/configs/websitename HTTP/1.1
+###
+
+## Update the name of the website (admin only)
+PUT http://localhost:3000/api/configs/websitename HTTP/1.1
+content-type: application/json
+
+{
+    "websiteName": "CMSmalling"
+}
+###

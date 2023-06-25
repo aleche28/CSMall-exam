@@ -8,8 +8,8 @@ const authController = require("../controllers/auth.controller");
 const usersDAO = require("../dao/users.dao");
 
 // This function is used to format express-validator errors as strings
-const errorFormatter = ({ location, msg, param, value, nestedErrors }) => {
-  return `${location}[${param}]: ${msg}`;
+const errorFormatter = ({ location, msg, path, value, nestedErrors }) => {
+  return `${location}[${path}]: ${msg}`;
 };
 
 router.post(

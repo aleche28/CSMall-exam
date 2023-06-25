@@ -56,7 +56,7 @@ exports.getPublishedPageById = async (req, res) => {
   try {
     const page = await pagesDAO.getPageById(req.params.pageId);
 
-    if (!page) {
+    if (page.error) {
       return res.status(404).json({ error: "Page not found" });
     }
     if (!isPublished(page))
@@ -88,6 +88,58 @@ exports.createPage = async (req, res) => {
 
 exports.updatePage = async (req, res) => {
   try {
+    const existingPage = await pagesDAO.getPageById(req.params.pageId);
+
+    if (existingPage.error)
+      return res.status(404).json({ error: "Page not found" });
+
+    // check that the author of the request is the author of the page
+    if (existingPage.author !== req.user.username)
+      return res.status(401).json({ error: "User making the request is not the author of the page" });
+
+    // check that the new publication date (if present) is after the creation date
+    if (req.body.publicationDate && 
+      dayjs(req.body.publicationDate).format(dateFormat) < 
+      dayjs(existingPage.creationDate).format(dateFormat))
+      return res.status(400).json({ error: "The publication date can't precede the creation date" });
+
+    // blocks updated only if an array of new blocks is passed
+    if (req.body.blocks) {
+      // first delete all old blocks, then add all the new ones
+      await blocksDAO.deleteAllPageBlocks(req.params.pageId);
+      req.body.blocks.forEach(async (b) => await blocksDAO.createBlock({...b, page: req.params.pageId}));
+    }
+
+    const body = {
+      title: req.body.title,
+      author: existingPage.author,
+      publicationDate:
+        (req.body.publicationDate && dayjs(req.body.publicationDate).format(dateFormat)) || null,
+    };
+
+    const page = await pagesDAO.updatePage(req.params.pageId, body);
+    if (page.error)
+      return res.status(400).json({ error: page.error });
+
+    res.json(page);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.updatePageAdmin = async (req, res) => {
+  try {
+    const existingPage = await pagesDAO.getPageById(req.params.pageId);
+
+    if (existingPage.error)
+      return res.status(404).json({ error: "Page not found" });
+
+    // check that the new publication date (if present) is after the creation date
+    if (req.body.publicationDate && 
+      dayjs(req.body.publicationDate).format(dateFormat) < 
+      dayjs(existingPage.creationDate).format(dateFormat))
+      return res.status(400).json({ error: "The publication date can't precede the creation date" });
+
     // blocks updated only if an array of new blocks is passed
     if (req.body.blocks) {
       // first delete all old blocks, then add all the new ones
@@ -114,6 +166,32 @@ exports.updatePage = async (req, res) => {
 
 exports.deletePage = async (req, res) => {
   try {
+    const existingPage = await pagesDAO.getPageById(req.params.pageId);
+    if (existingPage.error)
+      return res.status(404).json({ error: "Page not found" });
+
+    if (existingPage.author !== req.user.username)
+
+    // check that the author of the request is the author of the page
+    if (existingPage.author !== req.user.username)
+      return res.status(401).json({ error: "User making the request is not the author of the page" });
+
+    const result = await pagesDAO.deletePageById(req.params.pageId);
+    
+    if (result.error)
+      return res.status(404).json({ error: result.error });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.deletePageAdmin = async (req, res) => {
+  try {
+    const existingPage = await pagesDAO.getPageById(req.params.pageId);
+    if (existingPage.error)
+      return res.status(404).json({ error: "Page not found" });
+
     const result = await pagesDAO.deletePageById(req.params.pageId);
     
     if (result.error)

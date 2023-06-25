@@ -141,6 +141,8 @@ function EditPage(props) {
 
     if (!isValid) return;
 
+    setValidated(false); // don't show valid/not valid forms if everything is valid
+    
     const newPage = {
       title: title,
       author: author,
@@ -231,14 +233,14 @@ function EditPage(props) {
             <Col xs="2">
                 <Form.Group className="mb-4" controlId="formCreationDate">
                   <Form.Label>Creation date</Form.Label>
-                  <Form.Control disabled type="date" required={true} defaultValue={page.creationDate}/>
+                  <Form.Control disabled type="date" defaultValue={page.creationDate}/>
                 </Form.Group>
             </Col>
 
             <Col xs="2">
                 <Form.Group className="mb-4" controlId="formPublicationDate">
                   <Form.Label>Publication date</Form.Label>
-                  <Form.Control type="date" required={true} value={pubDate || ""}
+                  <Form.Control type="date" value={pubDate || ""}
                     min={dayjs(page.creationDate).format("YYYY-MM-DD")}
                     onChange={(ev) => {
                       setPubDate(ev.target.value);

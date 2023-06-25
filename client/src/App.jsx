@@ -87,7 +87,7 @@ function MainLayout(props) {
             <Navbar.Toggle aria-controls="navbar" />
               <Navbar.Collapse id="navbar">
                 <Nav className="me-auto">
-                  <Nav.Link as={Link} to={"/"}>Home</Nav.Link>
+                  <Nav.Link as={Link} to={"/"}>Front-Office</Nav.Link>
                   <Nav.Link as={Link} to={"/back-office"}>Back-Office</Nav.Link>
                   {user && user.role === "Admin" &&
                     <Nav.Link as={Link} to={"/admin/dashboard"}>Admin dashboard</Nav.Link>}

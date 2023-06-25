@@ -3,7 +3,19 @@ POST http://localhost:3000/api/pages HTTP/1.1
 content-type: application/json
 
 {
-    "title": "test page to delete"
+    "title": "test new page 2",
+    "blocks": [
+        {
+            "type": "header",
+            "content": "Chapter 1",
+            "position": 1
+        },
+        {
+            "type": "paragraph",
+            "content": "This is the content of the paragraph",
+            "position": 2
+        }
+    ]
 }
 ###
 
@@ -16,7 +28,7 @@ GET http://localhost:3000/api/pages/published HTTP/1.1
 ###
 
 ## Get all pages by the user logged in
-GET http://localhost:3000/api/authors/admin/pages HTTP/1.1
+GET http://localhost:3000/api/authors/user1/pages HTTP/1.1
 ###
 
 ## Get a specific page
@@ -24,11 +36,11 @@ GET http://localhost:3000/api/pages/1 HTTP/1.1
 ###
 
 ## Get a specific page (expect 404)
-GET http://localhost:3000/api/pages/0 HTTP/1.1
+GET http://localhost:3000/api/pages/4 HTTP/1.1
 ###
 
 ## Get a published page
-GET http://localhost:3000/api/pages/published/3 HTTP/1.1
+GET http://localhost:3000/api/pages/published/1 HTTP/1.1
 ###
 
 ## Get a published page (expect error)
@@ -36,31 +48,30 @@ GET http://localhost:3000/api/pages/published/5 HTTP/1.1
 ###
 
 ## Update an existing page (admin only)
-PUT http://localhost:3000/api/pages/1 HTTP/1.1
+PUT http://localhost:3000/api/pages/22 HTTP/1.1
 content-type: application/json
 
 {
     "title": "test page updated",
     "author": "admin",
-    "publicationDate": "2023-06-04"
+    "publicationDate": "2023-06-25"
 }
 ###
 
 ## Delete an existing page (admin only)
-DELETE http://localhost:3000/api/pages/13 HTTP/1.1
+DELETE http://localhost:3000/api/pages/21 HTTP/1.1
 ###
 
 ## Update an existing page (author only)
-PUT http://localhost:3000/api/authors/admin/pages/1 HTTP/1.1
+PUT http://localhost:3000/api/authors/user1/pages/19 HTTP/1.1
 content-type: application/json
 
 {
-    "title": "Lorem ipsum dolor sit",
-    "author": "admin",
-    "publicationDate": "2023-06-12"
+    "title": "test new page updated",
+    "publicationDate": "2023-06-25"
 }
 ###
 
 ## Delete an existing page (author only)
-DELETE http://localhost:3000/api/pages/13 HTTP/1.1
+DELETE http://localhost:3000/api/authors/user1/pages/19 HTTP/1.1
 ###

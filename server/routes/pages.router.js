@@ -6,8 +6,8 @@ const pagesController = require("../controllers/pages.controller");
 const router = express.Router();
 
 // This function is used to format express-validator errors as strings
-const errorFormatter = ({ location, msg, param, value, nestedErrors }) => {
-  return `${location}[${param}]: ${msg}`;
+const errorFormatter = ({ location, msg, path, value, nestedErrors }) => {
+  return `${location}[${path}]: ${msg}`;
 };
 
 const validate = (req, res, next) => {
@@ -36,6 +36,15 @@ const customBlocksValidator = (value) => {
     if (!Number.isInteger(block.position) || block.position < 1)
       throw new Error("Invalid block position");
   }
+
+  const valid =
+  value.some((b) => b.type === "header") &&
+  value.some((b) => b.type !== "header");
+
+  if (!valid)
+    throw new Error("List of page blocks must contain at least one header and one paragraph/image block");
+
+  return true;
 };
 
 /* check authentication middleware */
@@ -60,18 +69,6 @@ const isAuthor = (req, res, next) => {
 const isAdmin = (req, res, next) => {
   if (req.user.role === "Admin") return next();
   return res.status(401).json({ error: "Not authorized: must be an admin" });
-};
-
-const arePageBlocksValid = (req, res, next) => {
-  const valid =
-    req.body.blocks.some((b) => b.type === "header") &&
-    req.body.blocks.some((b) => b.type !== "header");
-
-  if (valid) return next();
-  return res.status(400).json({
-    error:
-      "List of page blocks must contain at least one header and one paragraph/image block",
-  });
 };
 
 /*************************
@@ -148,16 +145,12 @@ router.get(
 router.post(
   "/pages",
   check("title").isLength({ min: 1 }),
-  check("creationDate")
-    .isLength({ min: 10, max: 10 })
-    .isISO8601({ strict: true }),
   check("publicationDate")
     .optional({ values: "falsy" })
     .isLength({ min: 10, max: 10 })
     .isISO8601({ strict: true }),
-  check("blocks").optional().isArray({ min: 2 }).custom(customBlocksValidator),
+  check("blocks").isArray({ min: 2 }).custom(customBlocksValidator),
   validate,
-  arePageBlocksValid,
   pagesController.createPage
 );
 
@@ -174,26 +167,12 @@ router.put(
   isAuthor,
   check("pageId").isInt({ min: 1 }),
   check("title").isLength({ min: 1 }),
-  check("author").isLength({ min: 1 }),
-  check("creationDate")
-    .isLength({ min: 10, max: 10 })
-    .isISO8601({ strict: true }),
   check("publicationDate")
     .optional({ values: "falsy" })
     .isLength({ min: 10, max: 10 })
     .isISO8601({ strict: true }),
   check("blocks").optional().isArray({ min: 2 }).custom(customBlocksValidator),
   validate,
-  arePageBlocksValid,
-  (req, res, next) => {
-    if (req.body.author && req.body.author !== req.params.authorId)
-      return res.status(401).json({
-        error: "Not authorized: only admin can change authorship of the page",
-      });
-    req.body.author = req.params.authorId;
-    next();
-  },
-  // TO-DO: check if the page is actually from the author represented by authorId or not
   pagesController.updatePage
 );
 
@@ -226,17 +205,13 @@ router.put(
   check("pageId").isInt({ min: 1 }),
   check("title").isLength({ min: 1 }),
   check("author").isLength({ min: 1 }),
-  check("creationDate")
-    .isLength({ min: 10, max: 10 })
-    .isISO8601({ strict: true }),
   check("publicationDate")
     .isLength({ min: 10, max: 10 })
     .isISO8601({ strict: true })
     .optional({ values: "falsy" }),
   check("blocks").optional().isArray({ min: 2 }).custom(customBlocksValidator),
   validate,
-  arePageBlocksValid,
-  pagesController.updatePage
+  pagesController.updatePageAdmin
 );
 
 /**
@@ -249,7 +224,7 @@ router.delete(
   isAdmin,
   check("pageId").isInt({ min: 1 }),
   validate,
-  pagesController.deletePage
+  pagesController.deletePageAdmin
 );
 
 module.exports = router;

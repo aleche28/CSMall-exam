@@ -45,9 +45,9 @@ app.get("/api/images", (req, res) => {
 });
 
 /* routes */
+app.use('/api', configsRouter);
 app.use('/api', authRouter);
 app.use('/api', pagesRouter);
-app.use('/api', configsRouter);
 
 const PORT = 3000;
 
